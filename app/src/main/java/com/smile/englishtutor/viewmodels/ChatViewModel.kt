@@ -1,11 +1,16 @@
 package com.smile.englishtutor.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.annotation.SuppressLint
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.smile.englishtutor.models.ChatMessage
-import com.smile.englishtutor.mvi.ChatIntent
-import com.smile.englishtutor.mvi.ChatState
+import com.smile.englishtutor.mvi.ChatUserIntent
+import com.smile.englishtutor.mvi.ChatUiState
 import com.smile.englishtutor.retrofit.RestApiSync
+import com.smile.englishtutor.utilities.LogUtil
+import com.smile.englishtutor.utilities.TextToSpeechManager
+import com.smile.englishtutor.utilities.VoiceToTextManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,24 +19,79 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ChatViewModel : ViewModel() {
+class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _state = MutableStateFlow(ChatState())
-    val state: StateFlow<ChatState> = _state.asStateFlow()
+    companion object {
+        private const val TAG = "ChatViewModel"
+    }
+
+    private val _state = MutableStateFlow(ChatUiState())
+    val state: StateFlow<ChatUiState> = _state.asStateFlow()
+
+    private val voiceToTextManager = VoiceToTextManager(
+        context = application,
+        onResult = { text ->
+            handleIntent(ChatUserIntent.UpdateInput(text))
+        },
+        onError = { error ->
+            LogUtil.e(TAG, "voiceToTextManager.error = $error")
+            _state.update { it.copy(error = "Voice Error: $error") }
+        },
+        onListeningStatusChange = { isListening ->
+            _state.update { it.copy(isListening = isListening) }
+        }
+    )
+
+    private val ttsManager = TextToSpeechManager(
+        context = application,
+        onSpeechStart = { id ->
+            _state.update { it.copy(speakingMessageId = id) }
+        },
+        onSpeechDone = { _ ->
+            _state.update { it.copy(speakingMessageId = null) }
+        },
+        onSpeechError = { _ ->
+            _state.update { it.copy(speakingMessageId = null) }
+        }
+    )
 
     init {
         sendInitialMessage()
     }
 
-    fun handleIntent(intent: ChatIntent) {
+    fun handleIntent(intent: ChatUserIntent) {
         when (intent) {
-            is ChatIntent.UpdateInput -> {
+            is ChatUserIntent.UpdateInput -> {
                 _state.update { it.copy(inputText = intent.text) }
             }
-            ChatIntent.SendMessage -> {
+            ChatUserIntent.SendMessage -> {
                 sendMessage(_state.value.inputText)
             }
+            ChatUserIntent.ToggleVoiceInput -> {
+                LogUtil.d(TAG, "ToggleVoiceInput. isListening = ${_state.value.isListening}")
+                if (_state.value.isListening) {
+                    voiceToTextManager.stopListening()
+                } else {
+                    voiceToTextManager.startListening()
+                }
+            }
+            is ChatUserIntent.UpdatePermissionStatus -> {
+                _state.update { it.copy(hasRecordAudioPermission = intent.hasPermission) }
+            }
+            ChatUserIntent.ClearError -> {
+                _state.update { it.copy(error = null) }
+            }
+            is ChatUserIntent.SpeakText -> {
+                ttsManager.speak(intent.text, intent.messageId)
+            }
         }
+    }
+
+    @SuppressLint("EmptySuperCall")
+    override fun onCleared() {
+        super.onCleared()
+        voiceToTextManager.destroy()
+        ttsManager.destroy()
     }
 
     private fun sendInitialMessage() {
@@ -60,11 +120,11 @@ class ChatViewModel : ViewModel() {
             }
             
             _state.update {
+                val agentMsg = response?.agentResponse ?: "Error: No response from agent"
+                val agentMessage = ChatMessage(text = agentMsg, isUser = false)
+                ttsManager.speak(agentMsg, agentMessage.id)
                 it.copy(
-                    messages = it.messages + ChatMessage(
-                        text = response?.agentResponse ?: "Error: No response from agent",
-                        isUser = false
-                    ),
+                    messages = it.messages + agentMessage,
                     isLoading = false
                 )
             }
