@@ -1,5 +1,6 @@
 package com.smile.englishtutor.ui
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,7 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,6 +59,15 @@ fun ChatScreen(
             .background(Color.Black)
     ) {
         val screenWidth = maxWidth
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        
+        // Dynamic font size based on screen width and orientation
+        val baseFontSize = when {
+            screenWidth >= 800.dp && isLandscape -> 32.sp
+            screenWidth >= 600.dp -> 24.sp
+            else -> 16.sp
+        }
         
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -69,6 +82,7 @@ fun ChatScreen(
                     ChatBubble(
                         message = message,
                         isSpeaking = state.speakingMessageId == message.id,
+                        fontSize = baseFontSize,
                         onSpeakClick = { viewModel.handleIntent(ChatUserIntent.SpeakText(message.id, message.text)) }
                     )
                 }
@@ -93,6 +107,7 @@ fun ChatScreen(
                 inputText = state.inputText,
                 isListening = state.isListening,
                 hasPermission = state.hasRecordAudioPermission,
+                fontSize = baseFontSize,
                 onInputChange = { viewModel.handleIntent(ChatUserIntent.UpdateInput(it)) },
                 onSendClick = { viewModel.handleIntent(ChatUserIntent.SendMessage) },
                 onMicClick = { viewModel.handleIntent(ChatUserIntent.ToggleVoiceInput) }
@@ -105,6 +120,7 @@ fun ChatScreen(
 fun ChatBubble(
     message: ChatMessage,
     isSpeaking: Boolean,
+    fontSize: TextUnit = 16.sp,
     onSpeakClick: () -> Unit
 ) {
     val alignment = if (message.isUser) Alignment.End else Alignment.Start
@@ -122,11 +138,16 @@ fun ChatBubble(
             horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start
         ) {
             if (!message.isUser) {
-                IconButton(onClick = onSpeakClick) {
+                val iconSize = (fontSize.value * 1.5f).dp
+                IconButton(
+                    onClick = onSpeakClick,
+                    modifier = Modifier.size(iconSize)
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                         contentDescription = "Speak",
-                        tint = if (isSpeaking) Color.Red else Color.White
+                        tint = if (isSpeaking) Color.Red else Color.White,
+                        modifier = Modifier.fillMaxSize().padding(4.dp)
                     )
                 }
             }
@@ -139,7 +160,7 @@ fun ChatBubble(
                     text = message.text,
                     modifier = Modifier.padding(12.dp),
                     color = textColor,
-                    fontSize = 16.sp
+                    fontSize = fontSize
                 )
             }
         }
@@ -152,10 +173,12 @@ fun InputArea(
     inputText: String,
     isListening: Boolean,
     hasPermission: Boolean,
+    fontSize: TextUnit = 16.sp,
     onInputChange: (String) -> Unit,
     onSendClick: () -> Unit,
     onMicClick: () -> Unit
 ) {
+    val iconSize = (fontSize.value * 2.5f).dp
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -164,11 +187,16 @@ fun InputArea(
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onMicClick, enabled = hasPermission) {
+        IconButton(
+            onClick = onMicClick, 
+            enabled = hasPermission,
+            modifier = Modifier.size(iconSize)
+        ) {
             Icon(
                 imageVector = Icons.Default.Mic,
                 contentDescription = "Voice Input",
-                tint = if (!hasPermission) Color.DarkGray else if (isListening) Color.Red else Color.White
+                tint = if (!hasPermission) Color.DarkGray else if (isListening) Color.Red else Color.White,
+                modifier = Modifier.fillMaxSize().padding(4.dp)
             )
         }
         Spacer(modifier = Modifier.width(4.dp))
@@ -177,7 +205,8 @@ fun InputArea(
             onValueChange = onInputChange,
             modifier = Modifier
                 .weight(1f),
-            placeholder = { Text("Ask a question...", color = Color.Gray) },
+            textStyle = TextStyle(fontSize = fontSize),
+            placeholder = { Text("Ask a question...", color = Color.Gray, fontSize = fontSize) },
             minLines = 3,
             maxLines = 5,
             colors = TextFieldDefaults.colors(
@@ -191,11 +220,16 @@ fun InputArea(
             )
         )
         Spacer(modifier = Modifier.width(8.dp))
-        IconButton(onClick = onSendClick, enabled = inputText.isNotBlank()) {
+        IconButton(
+            onClick = onSendClick, 
+            enabled = inputText.isNotBlank(),
+            modifier = Modifier.size(iconSize)
+        ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,
                 contentDescription = "Send",
-                tint = if (inputText.isNotBlank()) Color.White else Color.Gray
+                tint = if (inputText.isNotBlank()) Color.White else Color.Gray,
+                modifier = Modifier.fillMaxSize().padding(4.dp)
             )
         }
     }

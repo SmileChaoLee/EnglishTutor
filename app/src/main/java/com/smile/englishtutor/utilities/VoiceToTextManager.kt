@@ -21,31 +21,52 @@ class VoiceToTextManager(
     private var speechRecognizer: SpeechRecognizer? = null
 
     fun startListening() {
-        LogUtil.d(TAG, "startListening")
+        val logStr = "startListening"
+        LogUtil.d(TAG, logStr)
+        /*
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            LogUtil.e(TAG, "$logStr.Speech Recognition Service is not available on this device.")
+            onError("Speech recognition is not available on this device.")
+            return
+        }
+        */
+        LogUtil.d(TAG, "$logStr.speechRecognizer = $speechRecognizer")
         if (speechRecognizer == null) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
-            speechRecognizer?.setRecognitionListener(this)
+            // Force use of Google's Speech Recognition Service which is standard on emulators
+            try {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+                speechRecognizer?.setRecognitionListener(this)
+            } catch (e: Exception) {
+                // Fallback to default if specific component fails
+                LogUtil.e(TAG, "$logStr.Exception", e)
+            }
         }
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
 
             // HINT: Tell the system to wait longer before deciding speech has ended
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
-                3000L) // 3 seconds
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
-                3000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000)
         }
 
-        speechRecognizer?.startListening(intent)
-        onListeningStatusChange(true)
+        try {
+            speechRecognizer?.startListening(intent)
+            onListeningStatusChange(true)
+        } catch (e: Exception) {
+            LogUtil.e(TAG, "$logStr.Exception.Failed to start listening", e)
+            onError("Could not start speech service.")
+        }
     }
 
     fun stopListening() {
         LogUtil.d(TAG, "stopListening")
-        speechRecognizer?.stopListening()
+        try {
+            speechRecognizer?.stopListening()
+        } catch (e: Exception) {
+            LogUtil.e(TAG, "Error stopping listener", e)
+        }
         onListeningStatusChange(false)
     }
 
@@ -66,16 +87,22 @@ class VoiceToTextManager(
         LogUtil.e(TAG, "onError: $error")
         val errorMessage = when (error) {
             SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client side error"
+            SpeechRecognizer.ERROR_CLIENT -> "Client side error (System service may have crashed)"
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
             SpeechRecognizer.ERROR_NETWORK -> "Network error"
             SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
+            SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized"
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
             SpeechRecognizer.ERROR_SERVER -> "Error from server"
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-            else -> "Unknown error"
+            else -> "Speech recognition error ($error)"
         }
+
+        // If the client service crashed, null out the recognizer so it recreates next time
+        if (error == SpeechRecognizer.ERROR_CLIENT) {
+            destroy()
+        }
+
         onError(errorMessage)
         onListeningStatusChange(false)
     }

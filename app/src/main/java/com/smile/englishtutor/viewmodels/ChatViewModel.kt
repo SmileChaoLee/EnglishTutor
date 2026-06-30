@@ -12,6 +12,7 @@ import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.utilities.TextToSpeechManager
 import com.smile.englishtutor.utilities.VoiceToTextManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
