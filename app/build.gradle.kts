@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation (libs.billing.ktx)
     // Kotlin DSL (build.gradle.kts)
     implementation(files("libs/smilelibraries-release.aar"))
     implementation(files("libs/NativeTemplatesModels-release.aar"))
