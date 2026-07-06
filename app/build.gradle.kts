@@ -15,15 +15,16 @@ android {
         applicationId = "com.smile.englishtutor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 100
-        versionName = "1.00"
+        versionCode = 101
+        versionName = "1.01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
