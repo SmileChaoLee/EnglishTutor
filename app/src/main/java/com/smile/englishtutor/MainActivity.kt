@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
         LogUtil.d(TAG, "onCreate.ScreenUtil.getDeviceType")
         val deviceType = ScreenUtil.getDeviceType(this@MainActivity)
         LogUtil.d(TAG, "onCreate.requestedOrientation")
-        /*
+
         requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
             // phone then change orientation to Portrait
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
             // Table then change orientation to Landscape
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
-        */
+
         LogUtil.d(TAG, "onCreate.checkPermissions()")
         checkPermissions()
     }
