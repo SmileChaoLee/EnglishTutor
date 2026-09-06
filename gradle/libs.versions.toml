@@ -7,12 +7,14 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 lifecycleViewmodelCompose = "2.11.0"
-kotlin = "2.4.0"
-composeBom = "2026.06.01"
+kotlin = "2.4.10"
+composeBom = "2026.08.00"
 retrofit = "3.0.0"
-appcompat = "1.7.1"
-constraintlayout = "2.2.1"
+appcompat = "1.8.0"
+constraintlayout = "2.2.2"
 billingKtx = "9.1.0"
+googleServices = "4.5.0"
+playServicesAdsApi = "25.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,8 +38,10 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billingKtx" }
+play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -15,8 +16,8 @@ android {
         applicationId = "com.smile.englishtutor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 101
-        versionName = "1.01"
+        versionCode = 102
+        versionName = "1.02"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -54,6 +55,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.play.services.ads.api)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation (libs.billing.ktx)

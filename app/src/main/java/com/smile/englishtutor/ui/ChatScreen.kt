@@ -29,7 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.smile.englishtutor.models.ChatMessage
 import com.smile.englishtutor.mvi.ChatUserIntent
+import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.ChatViewModel
+
+private const val TAG = "ChatScreen"
 
 @Composable
 fun ChatScreen(
@@ -41,12 +44,14 @@ fun ChatScreen(
     val context = LocalContext.current
 
     LaunchedEffect(state.messages.size) {
+        LogUtil.d(TAG, "LaunchedEffect.state.messages.size")
         if (state.messages.isNotEmpty()) {
             listState.animateScrollToItem(state.messages.size - 1)
         }
     }
 
     LaunchedEffect(state.error) {
+        LogUtil.d(TAG, "LaunchedEffect.state.error")
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.handleIntent(ChatUserIntent.ClearError)
@@ -160,7 +165,8 @@ fun ChatBubble(
                     text = message.text,
                     modifier = Modifier.padding(12.dp),
                     color = textColor,
-                    fontSize = fontSize
+                    fontSize = fontSize,
+                    lineHeight = (fontSize.value + 3).sp
                 )
             }
         }

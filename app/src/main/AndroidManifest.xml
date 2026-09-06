@@ -15,6 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishTutor"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8354869049759576~5866251912" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
