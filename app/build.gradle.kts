@@ -16,8 +16,8 @@ android {
         applicationId = "com.smile.englishtutor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 102
-        versionName = "1.02"
+        versionCode = 103
+        versionName = "1.03"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,10 +55,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.play.services.ads.api)
+    // implementation(libs.play.services.ads.api)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation (libs.billing.ktx)
+    implementation (libs.firebase.core)
+    implementation (libs.firebase.ads)
     // Kotlin DSL (build.gradle.kts)
     implementation(files("libs/smilelibraries-release.aar"))
     implementation(files("libs/NativeTemplatesModels-release.aar"))
