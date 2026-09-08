@@ -17,6 +17,7 @@ googleServices = "4.5.0"
 playServicesAdsApi = "25.4.0"
 firebaseAds = "23.6.0"
 firebaseCore = "21.1.1"
+userMessagingPlatform = "4.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = 
 play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 firebase-ads = { module = "com.google.firebase:firebase-ads", version.ref = "firebaseAds" }
 firebase-core = { module = "com.google.firebase:firebase-core", version.ref = "firebaseCore" }
+user-messaging-platform = { module = "com.google.android.ump:user-messaging-platform", version.ref = "userMessagingPlatform" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

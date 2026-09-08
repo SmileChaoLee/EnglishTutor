@@ -61,6 +61,7 @@ dependencies {
     implementation (libs.billing.ktx)
     implementation (libs.firebase.core)
     implementation (libs.firebase.ads)
+    implementation (libs.user.messaging.platform)
     // Kotlin DSL (build.gradle.kts)
     implementation(files("libs/smilelibraries-release.aar"))
     implementation(files("libs/NativeTemplatesModels-release.aar"))
