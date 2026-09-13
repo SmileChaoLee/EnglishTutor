@@ -15,14 +15,16 @@ object RestApiSync {
         return RetrofitClient.getRetrofit().create(RestApiInterface::class.java)
     }
 
-    fun getAgentResponse(userPrompt: String): AgentResponse? {
+    fun getAgentResponse(userPrompt: String, option: Int = 0): AgentResponse? {
         val logStr = "getAgentResponse"
         LogUtil.d(TAG, "$logStr.userPrompt = $userPrompt")
         val request = AgentRequest(userPrompt)
         val api = getApiInstance()
         var agentResponse: AgentResponse? = null
         try {
-            val response: Response<AgentResponse> = api.runAgentSync(request).execute()
+            val response: Response<AgentResponse> =
+                if (option == 0) api.runAgentSync(request).execute()
+                    else api.runAgentOptionSync(request, option).execute()
             if (response.isSuccessful && response.code() == HTTP_OK) {
                 agentResponse = response.body()
             }

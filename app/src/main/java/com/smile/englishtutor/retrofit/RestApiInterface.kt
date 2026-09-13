@@ -9,4 +9,6 @@ import retrofit2.http.POST
 interface RestApiInterface {
     @POST("agent/run")
     fun runAgentSync(@Body request: AgentRequest): Call<AgentResponse>
+    @POST("agent/run/option")
+    fun runAgentOptionSync(@Body request: AgentRequest, @Body option: Int): Call<AgentResponse>
 }
