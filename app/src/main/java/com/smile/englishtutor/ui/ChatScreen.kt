@@ -184,7 +184,8 @@ fun InputArea(
     onSendClick: () -> Unit,
     onMicClick: () -> Unit
 ) {
-    val iconSize = (fontSize.value * 2.5f).dp
+    val sendIconSize = (fontSize.value * 2.5f).dp
+    val micIconSize = (fontSize.value * 1.5f).dp * 2
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -193,18 +194,16 @@ fun InputArea(
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val micWidth = iconSize
-        val micHeight = iconSize * 2
         IconButton(
             onClick = onMicClick,
             enabled = hasPermission,
-            modifier = Modifier.requiredSize(width = micWidth, height = micHeight)
+            modifier = Modifier.size(micIconSize)
         ) {
             Icon(
                 imageVector = Icons.Default.Mic,
                 contentDescription = "Voice Input",
                 tint = if (!hasPermission) Color.DarkGray else if (isListening) Color.Red else Color.White,
-                modifier = Modifier.size(iconSize).padding(4.dp)
+                modifier = Modifier.fillMaxSize().padding(0.dp)
             )
         }
         Spacer(modifier = Modifier.width(4.dp))
@@ -231,7 +230,7 @@ fun InputArea(
         IconButton(
             onClick = onSendClick, 
             enabled = inputText.isNotBlank(),
-            modifier = Modifier.size(iconSize)
+            modifier = Modifier.size(sendIconSize)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Send,
