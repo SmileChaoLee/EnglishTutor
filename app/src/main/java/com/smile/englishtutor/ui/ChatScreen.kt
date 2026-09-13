@@ -144,9 +144,10 @@ fun ChatBubble(
         ) {
             if (!message.isUser) {
                 val iconSize = (fontSize.value * 1.5f).dp
+                val volumeIconSize = iconSize * 2
                 IconButton(
                     onClick = onSpeakClick,
-                    modifier = Modifier.size(iconSize)
+                    modifier = Modifier.size(volumeIconSize)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.VolumeUp,
