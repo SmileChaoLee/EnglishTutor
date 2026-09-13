@@ -143,8 +143,7 @@ fun ChatBubble(
             horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start
         ) {
             if (!message.isUser) {
-                val iconSize = (fontSize.value * 1.5f).dp
-                val volumeIconSize = iconSize * 2
+                val volumeIconSize = (fontSize.value * 1.5f).dp * 2
                 IconButton(
                     onClick = onSpeakClick,
                     modifier = Modifier.size(volumeIconSize)
@@ -194,16 +193,18 @@ fun InputArea(
             .imePadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val micWidth = iconSize
+        val micHeight = iconSize * 2
         IconButton(
-            onClick = onMicClick, 
+            onClick = onMicClick,
             enabled = hasPermission,
-            modifier = Modifier.size(iconSize)
+            modifier = Modifier.size(width = micWidth, height = micHeight)
         ) {
             Icon(
                 imageVector = Icons.Default.Mic,
                 contentDescription = "Voice Input",
                 tint = if (!hasPermission) Color.DarkGray else if (isListening) Color.Red else Color.White,
-                modifier = Modifier.fillMaxSize().padding(4.dp)
+                modifier = Modifier.size(iconSize).padding(4.dp)
             )
         }
         Spacer(modifier = Modifier.width(4.dp))
