@@ -198,7 +198,7 @@ fun InputArea(
         IconButton(
             onClick = onMicClick,
             enabled = hasPermission,
-            modifier = Modifier.size(width = micWidth, height = micHeight)
+            modifier = Modifier.requiredSize(width = micWidth, height = micHeight)
         ) {
             Icon(
                 imageVector = Icons.Default.Mic,
