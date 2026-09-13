@@ -5,10 +5,11 @@ import com.smile.englishtutor.models.AgentResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface RestApiInterface {
     @POST("agent/run")
     fun runAgentSync(@Body request: AgentRequest): Call<AgentResponse>
     @POST("agent/run/option")
-    fun runAgentOptionSync(@Body request: AgentRequest, @Body option: Int): Call<AgentResponse>
+    fun runAgentOptionSync(@Body request: AgentRequest, @Query("option") option: Int): Call<AgentResponse>
 }
