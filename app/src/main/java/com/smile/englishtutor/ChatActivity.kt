@@ -33,10 +33,10 @@ import com.smile.smilelibraries.AdMobBanner
 import com.smile.smilelibraries.utilities.ScreenUtil
 import com.smile.smilelibraries.utilities.UmpUtil
 
-class MainActivity : ComponentActivity() {
+class ChatActivity : ComponentActivity() {
 
     companion object {
-        private const val TAG ="MainActivity"
+        private const val TAG ="ChatActivity"
         private const val RECORD_AUDIO_REQUEST_CODE = 101
         private const val BANNER_AD_ID = "ca-app-pub-8354869049759576/4882297130"
     }
@@ -51,7 +51,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         LogUtil.d(TAG, "onCreate.savedInstanceState = $savedInstanceState")
         LogUtil.d(TAG, "onCreate.ViewModelProvider")
-        viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        val factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ChatViewModel(application, 0) as T
+            }
+        }
+        viewModel = ViewModelProvider(this, factory)[ChatViewModel::class.java]
         setContent {
             LogUtil.d(TAG, "onCreate.setContent")
             EnglishTutorTheme {
@@ -80,7 +86,7 @@ class MainActivity : ComponentActivity() {
         }
 
         LogUtil.d(TAG, "onCreate.ScreenUtil.getDeviceType")
-        val deviceType = ScreenUtil.getDeviceType(this@MainActivity)
+        val deviceType = ScreenUtil.getDeviceType(this@ChatActivity)
         LogUtil.d(TAG, "onCreate.requestedOrientation")
 
         requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
@@ -102,7 +108,7 @@ class MainActivity : ComponentActivity() {
             // release version
             ""
         }
-        UmpUtil.initConsentInformation(this@MainActivity,
+        UmpUtil.initConsentInformation(this@ChatActivity,
             DEBUG_GEOGRAPHY_EEA, deviceHashedId,
             object : UmpUtil.UmpInterface {
                 override fun callback() {

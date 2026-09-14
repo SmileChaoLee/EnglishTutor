@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ChatViewModel(application: Application) : AndroidViewModel(application) {
+class ChatViewModel(
+    application: Application,
+    private val option: Int = 0
+) : AndroidViewModel(application) {
 
     companion object {
         private const val TAG = "ChatViewModel"

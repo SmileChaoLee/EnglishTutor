@@ -21,7 +21,7 @@
             android:value="ca-app-pub-8354869049759576~5866251912" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ChatActivity"
             android:exported="true"
             android:theme="@style/Theme.EnglishTutor">
             <intent-filter>
