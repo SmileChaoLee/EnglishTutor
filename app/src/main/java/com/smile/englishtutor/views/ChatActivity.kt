@@ -1,11 +1,9 @@
-package com.smile.englishtutor
+package com.smile.englishtutor.views
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.MotionEvent
+import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,11 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.ads.AdView
-import com.google.android.ump.ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA
+import com.smile.englishtutor.models.Constants
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.ui.ChatScreen
 import com.smile.englishtutor.ui.theme.EnglishTutorTheme
@@ -31,33 +28,47 @@ import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.ChatViewModel
 import com.smile.smilelibraries.AdMobBanner
 import com.smile.smilelibraries.utilities.ScreenUtil
-import com.smile.smilelibraries.utilities.UmpUtil
 
 class ChatActivity : ComponentActivity() {
 
     companion object {
         private const val TAG ="ChatActivity"
-        private const val RECORD_AUDIO_REQUEST_CODE = 101
         private const val BANNER_AD_ID = "ca-app-pub-8354869049759576/4882297130"
     }
 
-    private var touchDisabled = true
+    private var hasRecordAudioPermission = false
+    private var option: Int = 0
     private lateinit var viewModel: ChatViewModel
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        touchDisabled = true
         enableEdgeToEdge()
         LogUtil.d(TAG, "onCreate.savedInstanceState = $savedInstanceState")
+        hasRecordAudioPermission = false
+        option = 0
+        if (savedInstanceState == null) {
+            intent?.let {
+                val extras = it.extras
+                extras?.let { extras ->
+                    hasRecordAudioPermission = extras.getBoolean(Constants.HAS_PERMISSION, false)
+                    option = extras.getInt(Constants.OPTION, 0)
+                }
+            }
+        } else {
+            hasRecordAudioPermission = savedInstanceState.getBoolean(Constants.HAS_PERMISSION, false)
+            option = savedInstanceState.getInt(Constants.OPTION, 0)
+        }
         LogUtil.d(TAG, "onCreate.ViewModelProvider")
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return ChatViewModel(application, 0) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return ChatViewModel(application, option) as T
             }
         }
         viewModel = ViewModelProvider(this, factory)[ChatViewModel::class.java]
+        viewModel.handleIntent(ChatUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
+
         setContent {
             LogUtil.d(TAG, "onCreate.setContent")
             EnglishTutorTheme {
@@ -88,7 +99,6 @@ class ChatActivity : ComponentActivity() {
         LogUtil.d(TAG, "onCreate.ScreenUtil.getDeviceType")
         val deviceType = ScreenUtil.getDeviceType(this@ChatActivity)
         LogUtil.d(TAG, "onCreate.requestedOrientation")
-
         requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
             // phone then change orientation to Portrait
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -96,61 +106,13 @@ class ChatActivity : ComponentActivity() {
             // Table then change orientation to Landscape
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
-
-        LogUtil.d(TAG, "onCreate.checkPermissions()")
-        checkPermissions()
-
-        // user consent for personal data collection
-        val deviceHashedId = if (BuildConfig.DEBUG) {
-            // Debug version
-            "B3EEABB8EE11C2BE770B684D95219ECB" // for debug test
-        } else {
-            // release version
-            ""
-        }
-        UmpUtil.initConsentInformation(this@ChatActivity,
-            DEBUG_GEOGRAPHY_EEA, deviceHashedId,
-            object : UmpUtil.UmpInterface {
-                override fun callback() {
-                    LogUtil.d(TAG, "onCreate.initConsentInformation.finished")
-                    // enabling receiving touch events
-                    touchDisabled = false
-                }
-            })
     }
 
-    private fun checkPermissions() {
-        val hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        viewModel.handleIntent(ChatUserIntent.UpdatePermissionStatus(hasPermission))
-
-        if (!hasPermission) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                RECORD_AUDIO_REQUEST_CODE
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == RECORD_AUDIO_REQUEST_CODE) {
-            val hasPermission = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            viewModel.handleIntent(ChatUserIntent.UpdatePermissionStatus(hasPermission))
-        }
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        if (touchDisabled) {
-            // Consume the touch event, effectively disabling touch
-            return true
-        }
-        // Allow touch events to proceed
-        return super.dispatchTouchEvent(ev)
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        LogUtil.d(TAG, "onSaveInstanceState()")
+        outState.putBoolean(Constants.HAS_PERMISSION, hasRecordAudioPermission)
+        outState.putInt(Constants.OPTION, option)
+        super.onSaveInstanceState(outState, outPersistentState)
     }
 
     @Composable

@@ -119,7 +119,7 @@ class ChatViewModel(
 
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
-                RestApiSync.getAgentResponse(text)
+                RestApiSync.getAgentResponse(text, option)
             }
             
             _state.update {

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">EnglishTutor</string>
+    <string name="loadingStr">Loading …</string>
+    <string name="conversationStr">Conversation</string>
+    <string name="grammarTipsStr">Grammar Tips</string>
+    <string name="translationStr">Translation</string>
 </resources>
