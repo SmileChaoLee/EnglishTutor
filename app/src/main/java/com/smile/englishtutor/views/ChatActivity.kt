@@ -11,15 +11,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.ads.AdView
+import com.smile.englishtutor.R
 import com.smile.englishtutor.models.Constants
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.ui.ChatScreen
@@ -76,7 +83,25 @@ class ChatActivity : ComponentActivity() {
                     (LocalWindowInfo.current.containerSize.width
                         .toDp().value*0.90f).toInt()
                 }
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                val title = when (option) {
+                    0 -> getString(R.string.conversationStr)
+                    1 -> getString(R.string.grammarTipsStr)
+                    2 -> getString(R.string.translationStr)
+                    else -> "Wrong option!"
+                }
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        TopAppBar(
+                            title = { Text(text = title, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                titleContentColor = Color(0xFF2E7D32),
+                            )
+                        )
+                    }
+                ) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
