@@ -425,13 +425,8 @@ class MainActivity : ComponentActivity() {
         val maxWidth = ScreenUtil.pixelToDp(screenSize.x.toFloat())
         val maxHeight = ScreenUtil.pixelToDp(screenSize.y.toFloat())
         LogUtil.d(TAG, "CreateMainUI.maxHeight = $maxHeight")
-        var verSpacerWeight = 1.0f
-        var horSpacerWeight = 1.0f
-        if (resources.configuration.orientation
-            == Configuration.ORIENTATION_LANDSCAPE) {
-            verSpacerWeight = 0.2f
-            horSpacerWeight = 2.5f
-        }
+        val verSpacerWeight = 1.0f
+        val horSpacerWeight = 1.0f
         var buttonWidth = maxWidth * ((10.0f - horSpacerWeight * 2.0f) / 10.0f)
         if (resources.configuration.orientation
             == Configuration.ORIENTATION_LANDSCAPE) {
