@@ -16,8 +16,8 @@ android {
         applicationId = "com.smile.englishtutor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 105
-        versionName = "1.05"
+        versionCode = 106
+        versionName = "1.06"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

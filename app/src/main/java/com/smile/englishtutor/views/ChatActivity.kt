@@ -8,20 +8,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -46,6 +59,8 @@ class ChatActivity : ComponentActivity() {
     private var hasRecordAudioPermission = false
     private var option: Int = 0
     private lateinit var viewModel: ChatViewModel
+    private val englishLanguage = "English"
+    private var targetLanguage = englishLanguage
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +90,7 @@ class ChatActivity : ComponentActivity() {
         }
         viewModel = ViewModelProvider(this, factory)[ChatViewModel::class.java]
         viewModel.handleIntent(ChatUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
+        viewModel.handleIntent(ChatUserIntent.Translate(translateFrom = englishLanguage, translateTo = targetLanguage))
 
         setContent {
             LogUtil.d(TAG, "onCreate.setContent")
@@ -107,6 +123,9 @@ class ChatActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
+                        if (option == 2) {
+                            TranslationBar()
+                        }
                         ChatScreen(
                             modifier = Modifier.weight(1f),
                             viewModel = viewModel
@@ -138,6 +157,76 @@ class ChatActivity : ComponentActivity() {
         outState.putBoolean(Constants.HAS_PERMISSION, hasRecordAudioPermission)
         outState.putInt(Constants.OPTION, option)
         super.onSaveInstanceState(outState, outPersistentState)
+    }
+
+    @Composable
+    fun TranslationBar() {
+        var isEnglishToOther by remember { mutableStateOf(true) }
+        var otherText by remember { mutableStateOf(targetLanguage) }
+        val greenColors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF2E7D32),
+            unfocusedBorderColor = Color(0xFF2E7D32)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val englishField = @Composable {
+                OutlinedTextField(
+                    value = englishLanguage,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Language") },
+                    colors = greenColors,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            val targetField = @Composable {
+                OutlinedTextField(
+                    value = otherText,
+                    onValueChange =
+                        {
+                            otherText = it
+                            targetLanguage = it
+                            LogUtil.d(TAG, "targetField.targetLanguage = $targetLanguage")
+                            if (isEnglishToOther) {
+                                viewModel.handleIntent(
+                                    ChatUserIntent.Translate(
+                                        translateFrom = englishLanguage,
+                                        translateTo = targetLanguage
+                                    )
+                                )
+                            } else {
+                                viewModel.handleIntent(
+                                    ChatUserIntent.Translate(
+                                        translateFrom = targetLanguage,
+                                        translateTo = englishLanguage
+                                    )
+                                )
+                            }
+                        },
+                    label = { Text("Language") },
+                    placeholder = { Text("Enter target") },
+                    colors = greenColors,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (isEnglishToOther) {
+                englishField()
+                IconButton(onClick = { isEnglishToOther = !isEnglishToOther }) {
+                    Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = "Reverse")
+                }
+                targetField()
+            } else {
+                targetField()
+                IconButton(onClick = { isEnglishToOther = !isEnglishToOther }) {
+                    Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = "Reverse")
+                }
+                englishField()
+            }
+        }
     }
 
     @Composable

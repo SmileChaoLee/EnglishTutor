@@ -58,6 +58,9 @@ class ChatViewModel(
         }
     )
 
+    private var translateFrom: String? = null
+    private var translateTo: String? = null
+
     init {
         sendInitialMessage()
     }
@@ -86,6 +89,12 @@ class ChatViewModel(
             }
             is ChatUserIntent.SpeakText -> {
                 ttsManager.speak(intent.text, intent.messageId)
+            }
+            is ChatUserIntent.Translate -> {
+                translateFrom = intent.translateFrom
+                translateTo = intent.translateTo
+                LogUtil.d(TAG, "handleIntent.translateFrom = $translateFrom")
+                LogUtil.d(TAG, "handleIntent.translateTo = $translateTo")
             }
         }
     }
@@ -119,7 +128,12 @@ class ChatViewModel(
 
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
-                RestApiSync.getAgentResponse(text, option)
+                var requestText = text
+                if (option == 2) {
+                    // translation
+                    requestText  = "Translate $text from $translateFrom to $translateTo"
+                }
+                RestApiSync.getAgentResponse(requestText, option)
             }
             
             _state.update {
