@@ -5,7 +5,18 @@ plugins {
 }
 
 android {
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("/home/chaolee/AndroidStudioProjects/keystore/new_key.jks")
+            storePassword = "86637971"
+            keyAlias = "chaolee1959"
+            keyPassword = "86637971"
+        }
+    }
+
     namespace = "com.smile.englishtutor"
+
     compileSdk {
         version = release(37) {
             minorApiLevel = 0
@@ -16,8 +27,8 @@ android {
         applicationId = "com.smile.englishtutor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 107
-        versionName = "1.07"
+        versionCode = 108
+        versionName = "1.08"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,6 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -39,6 +51,14 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force(libs.androidx.work.runtime.ktx)
+            force(libs.androidx.room.runtime)
+            force(libs.androidx.sqlite.framework)
+        }
     }
 }
 
@@ -62,6 +82,10 @@ dependencies {
     implementation (libs.firebase.core)
     implementation (libs.firebase.ads)
     implementation (libs.user.messaging.platform)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.sqlite.framework)
     // Kotlin DSL (build.gradle.kts)
     implementation(files("libs/smilelibraries-release.aar"))
     implementation(files("libs/NativeTemplatesModels-release.aar"))

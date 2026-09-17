@@ -18,6 +18,10 @@ playServicesAdsApi = "25.4.0"
 firebaseAds = "23.6.0"
 firebaseCore = "21.1.1"
 userMessagingPlatform = "4.0.0"
+workRuntimeKtx = "2.11.2"
+roomRuntime = "2.8.5"
+roomKtx = "2.8.5"
+sqliteFramework = "2.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +49,10 @@ play-services-ads-api = { group = "com.google.android.gms", name = "play-service
 firebase-ads = { module = "com.google.firebase:firebase-ads", version.ref = "firebaseAds" }
 firebase-core = { module = "com.google.firebase:firebase-core", version.ref = "firebaseCore" }
 user-messaging-platform = { module = "com.google.android.ump:user-messaging-platform", version.ref = "userMessagingPlatform" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqliteFramework" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -2,6 +2,7 @@ package com.smile.englishtutor.retrofit
 
 import com.smile.englishtutor.models.AgentRequest
 import com.smile.englishtutor.models.AgentResponse
+import com.smile.englishtutor.models.NewAgentRequest
 import com.smile.englishtutor.utilities.LogUtil
 import retrofit2.Response
 
@@ -24,7 +25,32 @@ object RestApiSync {
         try {
             val response: Response<AgentResponse> =
                 if (option == 0) api.runAgentSync(request).execute()
-                    else api.runAgentOptionSync(request, option).execute()
+                else api.runAgentOptionSync(request, option).execute()
+            if (response.isSuccessful && response.code() == HTTP_OK) {
+                agentResponse = response.body()
+            }
+        } catch (e: Exception) {
+            LogUtil.e(TAG, "$logStr.Exception", e)
+        }
+        LogUtil.i(TAG, "$logStr.agentResponse = $agentResponse")
+        return agentResponse
+    }
+
+    fun getAgentResponse(
+        userPrompt: String,
+        option: Int = 0,
+        history: List<Map<String, String>>
+    ): AgentResponse? {
+        val logStr = "getAgentResponse"
+        LogUtil.d(TAG, "$logStr.userPrompt = $userPrompt")
+        LogUtil.d(TAG, "$logStr.option = $option")
+        LogUtil.d(TAG, "$logStr.history = $history")
+        val request = NewAgentRequest(userPrompt, option, history)
+        val api = getApiInstance()
+        var agentResponse: AgentResponse? = null
+        try {
+            val response: Response<AgentResponse> =
+                api.newRunAgentSync(request).execute()
             if (response.isSuccessful && response.code() == HTTP_OK) {
                 agentResponse = response.body()
             }

@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.smile.englishtutor.models.ChatMessage
+import com.smile.englishtutor.models.Constants
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.mvi.ChatUiState
 import com.smile.englishtutor.retrofit.RestApiSync
@@ -60,8 +61,12 @@ class ChatViewModel(
 
     private var translateFrom: String? = null
     private var translateTo: String? = null
+    private val historyMessages = ArrayList<Map<String, String>>()
+    private val maxHistorySize = 10
 
     init {
+        translateFrom = Constants.ENGLISH_LANGUAGE
+        translateTo = Constants.ENGLISH_LANGUAGE
         sendInitialMessage()
     }
 
@@ -127,17 +132,23 @@ class ChatViewModel(
         }
 
         viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                var requestText = text
-                if (option == 2) {
-                    // translation
-                    requestText  = "Translate $text from $translateFrom to $translateTo"
-                }
-                RestApiSync.getAgentResponse(requestText, option)
+            var requestText = text
+            if (option == 2) {
+                // translation
+                requestText  = "Translate $text from $translateFrom to $translateTo"
             }
-            
+            val response = withContext(Dispatchers.IO) {
+                RestApiSync.getAgentResponse(requestText, option, historyMessages)
+                // RestApiSync.getAgentResponse(requestText, option)
+            }
             _state.update {
                 val agentMsg = response?.agentResponse ?: "Error: No response from agent"
+                if (historyMessages.size >= maxHistorySize) {
+                    historyMessages.removeAt(0)
+                }
+                historyMessages.add(mapOf("role" to "user", "content" to requestText))
+                historyMessages.add(mapOf("role" to "assistant", "content" to agentMsg))
+
                 val agentMessage = ChatMessage(text = agentMsg, isUser = false)
                 ttsManager.speak(agentMsg, agentMessage.id)
                 it.copy(

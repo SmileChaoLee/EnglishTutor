@@ -59,8 +59,8 @@ class ChatActivity : ComponentActivity() {
     private var hasRecordAudioPermission = false
     private var option: Int = 0
     private lateinit var viewModel: ChatViewModel
-    private val englishLanguage = "English"
-    private var targetLanguage = englishLanguage
+    private val englishLanguage = Constants.ENGLISH_LANGUAGE
+    private var targetLanguage = Constants.ENGLISH_LANGUAGE
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
