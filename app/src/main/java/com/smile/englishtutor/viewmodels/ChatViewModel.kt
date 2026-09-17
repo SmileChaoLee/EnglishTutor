@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 
 class ChatViewModel(
     application: Application,
-    private val option: Int = 0
+    private val option: Int = Constants.CONVERSATION_OPTION
 ) : AndroidViewModel(application) {
 
     companion object {
@@ -133,7 +133,7 @@ class ChatViewModel(
 
         viewModelScope.launch {
             var requestText = text
-            if (option == 2) {
+            if (option == Constants.TRANSLATION_OPTION) {
                 // translation
                 requestText  = "Translate $text from $translateFrom to $translateTo"
             }

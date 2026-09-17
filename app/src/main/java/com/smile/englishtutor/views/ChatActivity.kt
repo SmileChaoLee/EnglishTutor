@@ -100,9 +100,10 @@ class ChatActivity : ComponentActivity() {
                         .toDp().value*0.90f).toInt()
                 }
                 val title = when (option) {
-                    0 -> getString(R.string.conversationStr)
-                    1 -> getString(R.string.grammarTipsStr)
-                    2 -> getString(R.string.translationStr)
+                    Constants.CONVERSATION_OPTION -> getString(R.string.conversationStr)
+                    Constants.GRAMMAR_OPTION -> getString(R.string.grammarTipsStr)
+                    Constants.TRANSLATION_OPTION -> getString(R.string.translationStr)
+                    Constants.STORY_OPTION -> getString(R.string.englishStoryStr)
                     else -> "Wrong option!"
                 }
                 Scaffold(
@@ -113,7 +114,8 @@ class ChatActivity : ComponentActivity() {
                             title = { Text(text = title, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                titleContentColor = Color(0xFF2E7D32),
+                                // titleContentColor = Color(0xFF4CAF50),
+                                titleContentColor = Color(0xFF00FF00),
                             )
                         )
                     }
@@ -164,8 +166,8 @@ class ChatActivity : ComponentActivity() {
         var isEnglishToOther by remember { mutableStateOf(true) }
         var otherText by remember { mutableStateOf(targetLanguage) }
         val greenColors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color(0xFF2E7D32),
-            unfocusedBorderColor = Color(0xFF2E7D32)
+            focusedBorderColor = Color(0xFF4CAF50),
+            unfocusedBorderColor = Color(0xFF4CAF50)
         )
         Row(
             modifier = Modifier
