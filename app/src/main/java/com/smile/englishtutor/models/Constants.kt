@@ -1,8 +1,8 @@
 package com.smile.englishtutor.models
 
 object Constants {
-    const val HAS_PERMISSION = "hasPermission"
-    const val OPTION = "option"
+    const val HAS_PERMISSION = "HasPermission"
+    const val OPTION = "Option"
     const val ENGLISH_LANGUAGE = "English"
     const val CONVERSATION_OPTION = 0
     const val GRAMMAR_OPTION = 1
