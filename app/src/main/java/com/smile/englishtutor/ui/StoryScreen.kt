@@ -3,11 +3,19 @@ package com.smile.englishtutor.ui
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,16 +28,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.smile.englishtutor.mvi.ChatUserIntent
+import com.smile.englishtutor.mvi.StoryUserIntent
 import com.smile.englishtutor.utilities.LogUtil
-import com.smile.englishtutor.viewmodels.ChatViewModel
+import com.smile.englishtutor.viewmodels.StoryViewModel
 
-private const val TAG = "ChatScreen"
+private const val TAG = "StoryScreen"
 
 @Composable
-fun ChatScreen(
+fun StoryScreen(
     modifier: Modifier = Modifier,
-    viewModel: ChatViewModel = viewModel()
+    viewModel: StoryViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
@@ -46,7 +54,7 @@ fun ChatScreen(
         LogUtil.d(TAG, "LaunchedEffect.state.error")
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.handleIntent(ChatUserIntent.ClearError)
+            viewModel.handleIntent(StoryUserIntent.ClearError)
         }
     }
 
@@ -58,14 +66,14 @@ fun ChatScreen(
         val screenWidth = maxWidth
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        
+
         // Dynamic font size based on screen width and orientation
         val baseFontSize = when {
             screenWidth >= 800.dp && isLandscape -> 32.sp
             screenWidth >= 600.dp -> 24.sp
             else -> 16.sp
         }
-        
+
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = listState,
@@ -76,12 +84,7 @@ fun ChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(state.messages) { message ->
-                    ChatBubble(
-                        message = message,
-                        isSpeaking = state.speakingMessageId == message.id,
-                        fontSize = baseFontSize,
-                        onSpeakClick = { viewModel.handleIntent(ChatUserIntent.SpeakText(message.id, message.text)) }
-                    )
+                    // For the result of searching stories on YouTube
                 }
                 if (state.isLoading) {
                     item {
@@ -105,11 +108,10 @@ fun ChatScreen(
                 isListening = state.isListening,
                 hasPermission = state.hasRecordAudioPermission,
                 fontSize = baseFontSize,
-                onInputChange = { viewModel.handleIntent(ChatUserIntent.UpdateInput(it)) },
-                onSendClick = { viewModel.handleIntent(ChatUserIntent.SendMessage) },
-                onMicClick = { viewModel.handleIntent(ChatUserIntent.ToggleVoiceInput) }
+                onInputChange = { viewModel.handleIntent(StoryUserIntent.UpdateInput(it)) },
+                onSendClick = { viewModel.handleIntent(StoryUserIntent.SendMessage) },
+                onMicClick = { viewModel.handleIntent(StoryUserIntent.ToggleVoiceInput) }
             )
         }
     }
 }
-

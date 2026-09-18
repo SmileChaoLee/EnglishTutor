@@ -59,12 +59,14 @@ class ChatViewModel(
         }
     )
 
+    private var isInitial = true
     private var translateFrom: String? = null
     private var translateTo: String? = null
     private val historyMessages = ArrayList<Map<String, String>>()
     private val maxHistorySize = 10
 
     init {
+        isInitial = true
         translateFrom = Constants.ENGLISH_LANGUAGE
         translateTo = Constants.ENGLISH_LANGUAGE
         sendInitialMessage()
@@ -112,10 +114,11 @@ class ChatViewModel(
     }
 
     private fun sendInitialMessage() {
-        sendMessage("Who are you?", isInitial = true)
+        sendMessage("Who are you?")
+        isInitial = false
     }
 
-    private fun sendMessage(text: String, isInitial: Boolean = false) {
+    private fun sendMessage(text: String) {
         if (text.isBlank()) return
 
         if (!isInitial) {
@@ -133,7 +136,7 @@ class ChatViewModel(
 
         viewModelScope.launch {
             var requestText = text
-            if (option == Constants.TRANSLATION_OPTION) {
+            if (option == Constants.TRANSLATION_OPTION && !isInitial) {
                 // translation
                 requestText  = "Translate $text from $translateFrom to $translateTo"
             }

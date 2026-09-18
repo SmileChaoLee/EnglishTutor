@@ -14,16 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,28 +28,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.ads.AdView
+import com.smile.englishtutor.EnglishTutorApp
 import com.smile.englishtutor.R
 import com.smile.englishtutor.models.Constants
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.ui.ChatScreen
+import com.smile.englishtutor.ui.MyTopAppBar
+import com.smile.englishtutor.ui.ShowAdmobBanner
 import com.smile.englishtutor.ui.theme.EnglishTutorTheme
 import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.ChatViewModel
-import com.smile.smilelibraries.AdMobBanner
 import com.smile.smilelibraries.utilities.ScreenUtil
 
 class ChatActivity : ComponentActivity() {
 
     companion object {
         private const val TAG ="ChatActivity"
-        private const val BANNER_AD_ID = "ca-app-pub-8354869049759576/4882297130"
     }
 
     private var hasRecordAudioPermission = false
@@ -95,30 +88,16 @@ class ChatActivity : ComponentActivity() {
         setContent {
             LogUtil.d(TAG, "onCreate.setContent")
             EnglishTutorTheme {
-                val adWidth = with(LocalDensity.current) {
-                    (LocalWindowInfo.current.containerSize.width
-                        .toDp().value*0.90f).toInt()
-                }
                 val title = when (option) {
                     Constants.CONVERSATION_OPTION -> getString(R.string.conversationStr)
                     Constants.GRAMMAR_OPTION -> getString(R.string.grammarTipsStr)
                     Constants.TRANSLATION_OPTION -> getString(R.string.translationStr)
-                    Constants.STORY_OPTION -> getString(R.string.englishStoryStr)
+                    // Constants.STORY_OPTION -> getString(R.string.englishStoryStr)
                     else -> "Wrong option!"
                 }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        @OptIn(ExperimentalMaterial3Api::class)
-                        TopAppBar(
-                            title = { Text(text = title, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                // titleContentColor = Color(0xFF4CAF50),
-                                titleContentColor = Color(0xFF00FF00),
-                            )
-                        )
-                    }
+                    topBar = { MyTopAppBar(title) }
                 ) { innerPadding ->
                     Column(
                         modifier = Modifier
@@ -134,8 +113,7 @@ class ChatActivity : ComponentActivity() {
                         )
                         ShowAdmobBanner(
                             modifier = Modifier.fillMaxWidth(),
-                            bannerID = BANNER_AD_ID,
-                            width = adWidth
+                            bannerID = EnglishTutorApp.ADMOB_BANNER_ID
                         )
                     }
                 }
@@ -237,21 +215,5 @@ class ChatActivity : ComponentActivity() {
             }
             setTransLanguages(isEnglishToOther)
         }
-    }
-
-    @Composable
-    fun ShowAdmobBanner(modifier: Modifier = Modifier,
-                        bannerID: String, width: Int = 0) {
-        LogUtil.d(TAG, "ShowAdmobBanner.bannerID = $bannerID")
-        if (bannerID.isEmpty()) return
-        AndroidView(
-            modifier = modifier,
-            factory = { context ->
-                AdView(context)
-            },
-            update = { adView ->
-                AdMobBanner(adView, bannerID, width)
-            }
-        )
     }
 }

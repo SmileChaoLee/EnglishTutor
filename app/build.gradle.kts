@@ -29,7 +29,7 @@ android {
         targetSdk = 37
         versionCode = 109
         versionName = "1.09"
-
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -63,6 +63,7 @@ android {
 }
 
 dependencies {
+    implementation (libs.androidx.multidex)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

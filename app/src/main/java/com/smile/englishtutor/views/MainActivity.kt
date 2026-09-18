@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -67,6 +68,7 @@ class MainActivity : ComponentActivity() {
     private var toastFontSize: TextUnit = 0.sp
     private var screenSize = Point(0, 0)
     private lateinit var chatActivityLauncher: ActivityResultLauncher<Intent>
+    private lateinit var storyActivityLauncher: ActivityResultLauncher<Intent>
     //
     private val loadingMessage = mutableStateOf("")
     private val backgroundColor = Color(0xffd4d28f)
@@ -95,6 +97,14 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult()) {
                 result: ActivityResult ->
             LogUtil.d(TAG, "chatActivityLauncher.result = $result")
+            loadingMessage.value = ""
+            enableMainButtons()
+        }
+
+        storyActivityLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) {
+                result: ActivityResult ->
+            LogUtil.d(TAG, "storyActivityLauncher.result = $result")
             loadingMessage.value = ""
             enableMainButtons()
         }
@@ -269,13 +279,12 @@ class MainActivity : ComponentActivity() {
     private fun startStoryActivity() {
         Intent(
             this@MainActivity,
-            ChatActivity::class.java
+            StoryActivity::class.java
         ).also {
             disableMainButtons()
             it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, Constants.STORY_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
-            chatActivityLauncher.launch(it)
+            storyActivityLauncher.launch(it)
         }
     }
 
@@ -484,29 +493,63 @@ class MainActivity : ComponentActivity() {
         val textLineHeight = (toastFontSize.value + 5.0f).sp
         val orientation = resources.configuration.orientation
         LogUtil.d(TAG, "CreateMainUI.orientation = $orientation")
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            ConversationButton(
-                modifier = Modifier.weight(1.0f),
-                buttonWidth, buttonHeight, textLineHeight
-            )
-            GrammarButton(
-                modifier = Modifier.weight(1.0f),
-                buttonWidth, buttonHeight, textLineHeight
-            )
-            TranslationButton(
-                modifier = Modifier.weight(1.0f),
-                buttonWidth, buttonHeight, textLineHeight
-            )
-            /*
-            StoryButton(
-                modifier = Modifier.weight(1.0f),
-                buttonWidth, buttonHeight, textLineHeight
-            )
-            */
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                ConversationButton(
+                    modifier = Modifier.weight(1.0f),
+                    buttonWidth, buttonHeight, textLineHeight
+                )
+                GrammarButton(
+                    modifier = Modifier.weight(1.0f),
+                    buttonWidth, buttonHeight, textLineHeight
+                )
+                TranslationButton(
+                    modifier = Modifier.weight(1.0f),
+                    buttonWidth, buttonHeight, textLineHeight
+                )
+                StoryButton(
+                    modifier = Modifier.weight(1.0f),
+                    buttonWidth, buttonHeight, textLineHeight
+                )
+            }
+        } else {
+            // For Landscape orientation
+            Row(modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1.0f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    ConversationButton(
+                        modifier = Modifier.weight(1.0f),
+                        buttonWidth, buttonHeight, textLineHeight
+                    )
+                    GrammarButton(
+                        modifier = Modifier.weight(1.0f),
+                        buttonWidth, buttonHeight, textLineHeight
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1.0f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    TranslationButton(
+                        modifier = Modifier.weight(1.0f),
+                        buttonWidth, buttonHeight, textLineHeight
+                    )
+                    StoryButton(
+                        modifier = Modifier.weight(1.0f),
+                        buttonWidth, buttonHeight, textLineHeight
+                    )
+                }
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 [versions]
+multidex = "2.0.1"
 agp = "9.2.1"
 coreKtx = "1.19.0"
 junit = "4.13.2"
@@ -8,13 +9,13 @@ lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 lifecycleViewmodelCompose = "2.11.0"
 kotlin = "2.4.20"
-composeBom = "2026.08.00"
+composeBom = "2026.09.00"
 retrofit = "3.0.0"
 appcompat = "1.8.0"
 constraintlayout = "2.2.2"
 billingKtx = "9.1.0"
 googleServices = "4.5.0"
-playServicesAdsApi = "25.4.0"
+playServicesAdsApi = "25.5.0"
 firebaseAds = "23.6.0"
 firebaseCore = "21.1.1"
 userMessagingPlatform = "4.0.0"
@@ -24,6 +25,7 @@ roomKtx = "2.8.5"
 sqliteFramework = "2.7.1"
 
 [libraries]
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
