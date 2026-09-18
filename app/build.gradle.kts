@@ -29,7 +29,6 @@ android {
         targetSdk = 37
         versionCode = 109
         versionName = "1.09"
-        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -63,7 +62,6 @@ android {
 }
 
 dependencies {
-    implementation (libs.androidx.multidex)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -91,6 +89,9 @@ dependencies {
     implementation(files("libs/smilelibraries-release.aar"))
     implementation(files("libs/NativeTemplatesModels-release.aar"))
 
+    implementation(libs.androidyoutubeplayer.core)
+    implementation(libs.androidyoutubeplayer.custom.ui)
+    
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
