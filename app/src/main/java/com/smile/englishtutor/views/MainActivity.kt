@@ -66,10 +66,7 @@ class MainActivity : ComponentActivity() {
     private var mFontSize: TextUnit = 0.sp
     private var toastFontSize: TextUnit = 0.sp
     private var screenSize = Point(0, 0)
-    // the following are for ColorBallActivity
-    private lateinit var conversationLauncher: ActivityResultLauncher<Intent>
-    private lateinit var grammarLauncher: ActivityResultLauncher<Intent>
-    private lateinit var translationLauncher: ActivityResultLauncher<Intent>
+    private lateinit var chatActivityLauncher: ActivityResultLauncher<Intent>
     //
     private val loadingMessage = mutableStateOf("")
     private val backgroundColor = Color(0xffd4d28f)
@@ -80,6 +77,7 @@ class MainActivity : ComponentActivity() {
     private var isConversationEnabled by mutableStateOf(true)
     private var isGrammarEnabled by mutableStateOf(true)
     private var isTranslationEnabled by mutableStateOf(true)
+    private var isStoryEnabled by mutableStateOf(true)
     private var hasRecordAudioPermission: Boolean = false
 
     @SuppressLint("ConfigurationScreenWidthHeight",
@@ -93,24 +91,10 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        conversationLauncher = registerForActivityResult(
+        chatActivityLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()) {
                 result: ActivityResult ->
-            LogUtil.d(TAG, "conversationLauncher.result = $result")
-            loadingMessage.value = ""
-            enableMainButtons()
-        }
-        grammarLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()) {
-                result: ActivityResult ->
-            LogUtil.d(TAG, "grammarLauncher.result = $result")
-            loadingMessage.value = ""
-            enableMainButtons()
-        }
-        translationLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()) {
-                result: ActivityResult ->
-            LogUtil.d(TAG, "translationLauncher.result = $result")
+            LogUtil.d(TAG, "chatActivityLauncher.result = $result")
             loadingMessage.value = ""
             enableMainButtons()
         }
@@ -212,12 +196,14 @@ class MainActivity : ComponentActivity() {
         isConversationEnabled = true
         isGrammarEnabled = true
         isTranslationEnabled = true
+        isStoryEnabled = true
     }
 
     private fun disableMainButtons() {
         isConversationEnabled = false
         isGrammarEnabled = false
         isTranslationEnabled = false
+        isStoryEnabled = false
     }
 
     private fun dataConsentRequest() {
@@ -248,9 +234,9 @@ class MainActivity : ComponentActivity() {
         ).also {
             disableMainButtons()
             it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, 0)
+            it.putExtra(Constants.OPTION, Constants.CONVERSATION_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
-            conversationLauncher.launch(it)
+            chatActivityLauncher.launch(it)
         }
     }
 
@@ -261,9 +247,9 @@ class MainActivity : ComponentActivity() {
         ).also {
             disableMainButtons()
             it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, 1)
+            it.putExtra(Constants.OPTION, Constants.GRAMMAR_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
-            grammarLauncher.launch(it)
+            chatActivityLauncher.launch(it)
         }
     }
 
@@ -274,9 +260,22 @@ class MainActivity : ComponentActivity() {
         ).also {
             disableMainButtons()
             it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, 2)
+            it.putExtra(Constants.OPTION, Constants.TRANSLATION_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
-            grammarLauncher.launch(it)
+            chatActivityLauncher.launch(it)
+        }
+    }
+
+    private fun startStoryActivity() {
+        Intent(
+            this@MainActivity,
+            ChatActivity::class.java
+        ).also {
+            disableMainButtons()
+            it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
+            it.putExtra(Constants.OPTION, Constants.STORY_OPTION)
+            loadingMessage.value = getString(R.string.loadingStr)
+            chatActivityLauncher.launch(it)
         }
     }
 
@@ -419,6 +418,52 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
+    fun StoryButton(modifier: Modifier = Modifier,
+                    buttonWidth: Float,
+                    buttonHeight: Float,
+                    textLineHeight: TextUnit) {
+        LogUtil.d(TAG, "StoryButton")
+        Column(modifier = modifier,
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center) {
+            val bRemoverClicked = remember { mutableStateOf(false) }
+            Button(
+                enabled = isStoryEnabled,
+                onClick = {
+                    CoroutineScope(Dispatchers.Default).launch {
+                        bRemoverClicked.value = true
+                        delay(200)
+                        startStoryActivity()
+                        bRemoverClicked.value = false
+                    }
+                },
+                modifier = Modifier//.weight(1.0f)
+                    .width(width = buttonWidth.dp)
+                    .height(height = buttonHeight.dp)
+                    .background(color = buttonBackground),
+                colors = ButtonColors(
+                    containerColor =
+                        if (!bRemoverClicked.value) buttonContainerColor
+                        else Color.Cyan,
+                    disabledContainerColor = buttonContainerColor,
+                    contentColor =
+                        if (!bRemoverClicked.value)
+                            buttonContentColor
+                        else Color.Red ,
+                    disabledContentColor = buttonContentColor
+                )
+            )
+            {
+                Text(
+                    text = getString(R.string.englishStoryStr),
+                    lineHeight = textLineHeight,
+                    fontSize = mFontSize
+                )
+            }
+        }
+    }
+
+    @Composable
     fun CreateMainUI() {
         LogUtil.d(TAG, "CreateMainUI")
         if (loadingMessage.value.isNotEmpty()) return
@@ -456,6 +501,12 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.weight(1.0f),
                 buttonWidth, buttonHeight, textLineHeight
             )
+            /*
+            StoryButton(
+                modifier = Modifier.weight(1.0f),
+                buttonWidth, buttonHeight, textLineHeight
+            )
+            */
         }
     }
 

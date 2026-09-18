@@ -57,7 +57,7 @@ class ChatActivity : ComponentActivity() {
     }
 
     private var hasRecordAudioPermission = false
-    private var option: Int = 0
+    private var option: Int = Constants.CONVERSATION_OPTION
     private lateinit var viewModel: ChatViewModel
     private val englishLanguage = Constants.ENGLISH_LANGUAGE
     private var targetLanguage = Constants.ENGLISH_LANGUAGE
@@ -68,7 +68,7 @@ class ChatActivity : ComponentActivity() {
         enableEdgeToEdge()
         LogUtil.d(TAG, "onCreate.savedInstanceState = $savedInstanceState")
         hasRecordAudioPermission = false
-        option = 0
+        option = Constants.CONVERSATION_OPTION
         if (savedInstanceState == null) {
             intent?.let {
                 val extras = it.extras
@@ -125,7 +125,7 @@ class ChatActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
-                        if (option == 2) {
+                        if (option == Constants.TRANSLATION_OPTION) {
                             TranslationBar()
                         }
                         ChatScreen(
@@ -161,8 +161,28 @@ class ChatActivity : ComponentActivity() {
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
+    private fun setTransLanguages(isEnglishTo: Boolean) {
+        LogUtil.d(TAG, "setTransLanguages.isEnglishTo: $isEnglishTo")
+        if (isEnglishTo) {
+            viewModel.handleIntent(
+                ChatUserIntent.Translate(
+                    translateFrom = englishLanguage,
+                    translateTo = targetLanguage
+                )
+            )
+        } else {
+            viewModel.handleIntent(
+                ChatUserIntent.Translate(
+                    translateFrom = targetLanguage,
+                    translateTo = englishLanguage
+                )
+            )
+        }
+    }
+
     @Composable
     fun TranslationBar() {
+        val logStr = "TranslationBar"
         var isEnglishToOther by remember { mutableStateOf(true) }
         var otherText by remember { mutableStateOf(targetLanguage) }
         val greenColors = OutlinedTextFieldDefaults.colors(
@@ -192,22 +212,7 @@ class ChatActivity : ComponentActivity() {
                         {
                             otherText = it
                             targetLanguage = it
-                            LogUtil.d(TAG, "targetField.targetLanguage = $targetLanguage")
-                            if (isEnglishToOther) {
-                                viewModel.handleIntent(
-                                    ChatUserIntent.Translate(
-                                        translateFrom = englishLanguage,
-                                        translateTo = targetLanguage
-                                    )
-                                )
-                            } else {
-                                viewModel.handleIntent(
-                                    ChatUserIntent.Translate(
-                                        translateFrom = targetLanguage,
-                                        translateTo = englishLanguage
-                                    )
-                                )
-                            }
+                            setTransLanguages(isEnglishToOther)
                         },
                     label = { Text("Language") },
                     placeholder = { Text("Enter target") },
@@ -216,18 +221,21 @@ class ChatActivity : ComponentActivity() {
                 )
             }
             if (isEnglishToOther) {
+                LogUtil.d(TAG, "$logStr.isEnglishToOther.targetLanguage = $targetLanguage")
                 englishField()
                 IconButton(onClick = { isEnglishToOther = !isEnglishToOther }) {
                     Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = "Reverse")
                 }
                 targetField()
             } else {
+                LogUtil.d(TAG, "$logStr.not EnglishToOther.targetLanguage = $targetLanguage")
                 targetField()
                 IconButton(onClick = { isEnglishToOther = !isEnglishToOther }) {
                     Icon(imageVector = Icons.Default.SwapHoriz, contentDescription = "Reverse")
                 }
                 englishField()
             }
+            setTransLanguages(isEnglishToOther)
         }
     }
 
