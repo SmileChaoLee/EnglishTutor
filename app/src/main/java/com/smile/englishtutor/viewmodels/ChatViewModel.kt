@@ -1,8 +1,6 @@
 package com.smile.englishtutor.viewmodels
 
-import android.annotation.SuppressLint
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.smile.englishtutor.models.ChatMessage
 import com.smile.englishtutor.models.Constants
@@ -11,51 +9,37 @@ import com.smile.englishtutor.mvi.ChatUiState
 import com.smile.englishtutor.retrofit.RestApiSync
 import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.utilities.TextToSpeechManager
-import com.smile.englishtutor.utilities.VoiceToTextManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChatViewModel(
     application: Application,
     private val option: Int = Constants.CONVERSATION_OPTION
-) : AndroidViewModel(application) {
+) : BaseViewModel<ChatUiState, ChatUserIntent>(application, ChatUiState()) {
 
-    companion object {
-        private const val TAG = "ChatViewModel"
+    override val TAG = "ChatViewModel"
+
+    override fun onVoiceResult(text: String) {
+        handleIntent(ChatUserIntent.UpdateInput(text))
     }
 
-    private val _state = MutableStateFlow(ChatUiState())
-    val state: StateFlow<ChatUiState> = _state.asStateFlow()
-
-    private val voiceToTextManager = VoiceToTextManager(
-        context = application,
-        onResult = { text ->
-            handleIntent(ChatUserIntent.UpdateInput(text))
-        },
-        onError = { error ->
-            LogUtil.e(TAG, "voiceToTextManager.error = $error")
-            _state.update { it.copy(error = "Voice Error: $error") }
-        },
-        onListeningStatusChange = { isListening ->
-            _state.update { it.copy(isListening = isListening) }
-        }
-    )
+    override fun copyWithError(state: ChatUiState, error: String?): ChatUiState = state.copy(error = error)
+    override fun copyWithListeningStatus(state: ChatUiState, isListening: Boolean): ChatUiState = state.copy(isListening = isListening)
+    override fun copyWithInputText(state: ChatUiState, text: String): ChatUiState = state.copy(inputText = text)
+    override fun copyWithLoadingStatus(state: ChatUiState, isLoading: Boolean): ChatUiState = state.copy(isLoading = isLoading)
+    override fun copyWithPermissionStatus(state: ChatUiState, hasPermission: Boolean): ChatUiState = state.copy(hasRecordAudioPermission = hasPermission)
 
     private val ttsManager = TextToSpeechManager(
         context = application,
         onSpeechStart = { id ->
-            _state.update { it.copy(speakingMessageId = id) }
+            updateState { it.copy(speakingMessageId = id) }
         },
         onSpeechDone = { _ ->
-            _state.update { it.copy(speakingMessageId = null) }
+            updateState { it.copy(speakingMessageId = null) }
         },
         onSpeechError = { _ ->
-            _state.update { it.copy(speakingMessageId = null) }
+            updateState { it.copy(speakingMessageId = null) }
         }
     )
 
@@ -72,27 +56,22 @@ class ChatViewModel(
         sendInitialMessage()
     }
 
-    fun handleIntent(intent: ChatUserIntent) {
+    override fun handleIntent(intent: ChatUserIntent) {
         when (intent) {
             is ChatUserIntent.UpdateInput -> {
-                _state.update { it.copy(inputText = intent.text) }
+                updateState { copyWithInputText(it, intent.text) }
             }
             ChatUserIntent.SendMessage -> {
                 sendMessage(_state.value.inputText)
             }
             ChatUserIntent.ToggleVoiceInput -> {
-                LogUtil.d(TAG, "ToggleVoiceInput. isListening = ${_state.value.isListening}")
-                if (_state.value.isListening) {
-                    voiceToTextManager.stopListening()
-                } else {
-                    voiceToTextManager.startListening()
-                }
+                toggleVoiceInput()
             }
             is ChatUserIntent.UpdatePermissionStatus -> {
-                _state.update { it.copy(hasRecordAudioPermission = intent.hasPermission) }
+                updateState { copyWithPermissionStatus(it, intent.hasPermission) }
             }
             ChatUserIntent.ClearError -> {
-                _state.update { it.copy(error = null) }
+                updateState { copyWithError(it, null) }
             }
             is ChatUserIntent.SpeakText -> {
                 ttsManager.speak(intent.text, intent.messageId)
@@ -106,10 +85,8 @@ class ChatViewModel(
         }
     }
 
-    @SuppressLint("EmptySuperCall")
     override fun onCleared() {
         super.onCleared()
-        voiceToTextManager.destroy()
         ttsManager.destroy()
     }
 
@@ -123,7 +100,7 @@ class ChatViewModel(
 
         if (!isInitial) {
             val userMessage = ChatMessage(text = text, isUser = true)
-            _state.update {
+            updateState {
                 it.copy(
                     messages = it.messages + userMessage,
                     inputText = "",
@@ -131,7 +108,7 @@ class ChatViewModel(
                 )
             }
         } else {
-            _state.update { it.copy(isLoading = true) }
+            updateState { it.copy(isLoading = true) }
         }
 
         viewModelScope.launch {
@@ -144,7 +121,7 @@ class ChatViewModel(
                 RestApiSync.getAgentResponse(requestText, option, historyMessages)
                 // RestApiSync.getAgentResponse(requestText, option)
             }
-            _state.update {
+            updateState {
                 val agentMsg = response?.agentResponse ?: "Error: No response from agent"
                 if (historyMessages.size >= maxHistorySize) {
                     historyMessages.removeAt(0)
