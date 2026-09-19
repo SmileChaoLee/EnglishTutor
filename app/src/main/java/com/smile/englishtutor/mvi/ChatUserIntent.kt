@@ -1,6 +1,6 @@
 package com.smile.englishtutor.mvi
 
-sealed class ChatUserIntent {
+sealed class ChatUserIntent : BaseUserIntent {
     data class UpdateInput(val text: String) : ChatUserIntent()
     object SendMessage : ChatUserIntent()
     object ToggleVoiceInput : ChatUserIntent()
