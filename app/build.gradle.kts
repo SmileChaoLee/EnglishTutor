@@ -77,6 +77,10 @@ dependencies {
     // implementation(libs.play.services.ads.api)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    // For coroutines (optional, but recommended for modern Android development)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.retrofit.coroutines.adapter)
+
     implementation (libs.billing.ktx)
     implementation (libs.firebase.core)
     implementation (libs.firebase.ads)
@@ -91,6 +95,7 @@ dependencies {
 
     implementation(libs.androidyoutubeplayer.core)
     implementation(libs.androidyoutubeplayer.custom.ui)
+    implementation(libs.coil.compose)
     
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

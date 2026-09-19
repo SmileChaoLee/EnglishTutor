@@ -1,9 +1,9 @@
 package com.smile.englishtutor.mvi
 
-import com.smile.englishtutor.models.ChatMessage
+import com.smile.englishtutor.models.YouTubeVideo
 
 data class StoryUiState (
-    val messages: List<ChatMessage> = emptyList(),
+    val videos: List<YouTubeVideo> = emptyList(),
     val inputText: String = "",
     val isLoading: Boolean = false,
     val isListening: Boolean = false,
