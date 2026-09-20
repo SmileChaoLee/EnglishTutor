@@ -139,7 +139,7 @@ fun StoryScreen(
                 hasPermission = state.hasRecordAudioPermission,
                 fontSize = baseFontSize,
                 onInputChange = { viewModel.handleIntent(BaseUserIntent.UpdateInput(it)) },
-                onSendClick = { viewModel.handleIntent(StoryUserIntent.SendMessage) },
+                onSendClick = { viewModel.handleIntent(StoryUserIntent.GetStories) },
                 onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
             )
         }

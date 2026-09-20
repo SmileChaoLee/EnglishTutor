@@ -21,7 +21,7 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
         if (handleBaseIntent(intent)) return
         
         when (intent) {
-            is StoryUserIntent.SendMessage -> {
+            is StoryUserIntent.GetStories -> {
                 updateState { copyWithLoadingStatus(it, true) }
                 viewModelScope.launch(Dispatchers.IO) {
                     val searchTerm = "Stories about ${_state.value.inputText}"
