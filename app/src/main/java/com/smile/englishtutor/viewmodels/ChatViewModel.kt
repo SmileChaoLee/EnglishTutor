@@ -24,12 +24,6 @@ class ChatViewModel(
         handleIntent(ChatUserIntent.UpdateInput(text))
     }
 
-    override fun copyWithError(state: ChatUiState, error: String?): ChatUiState = state.copy(error = error)
-    override fun copyWithListeningStatus(state: ChatUiState, isListening: Boolean): ChatUiState = state.copy(isListening = isListening)
-    override fun copyWithInputText(state: ChatUiState, text: String): ChatUiState = state.copy(inputText = text)
-    override fun copyWithLoadingStatus(state: ChatUiState, isLoading: Boolean): ChatUiState = state.copy(isLoading = isLoading)
-    override fun copyWithPermissionStatus(state: ChatUiState, hasPermission: Boolean): ChatUiState = state.copy(hasRecordAudioPermission = hasPermission)
-
     private val ttsManager = TextToSpeechManager(
         context = application,
         onSpeechStart = { id ->
@@ -103,12 +97,11 @@ class ChatViewModel(
             updateState {
                 it.copy(
                     messages = it.messages + userMessage,
-                    inputText = "",
-                    isLoading = true
+                    base = it.base.copy(inputText = "", isLoading = true)
                 )
             }
         } else {
-            updateState { it.copy(isLoading = true) }
+            updateState { copyWithLoadingStatus(it, true) }
         }
 
         viewModelScope.launch {
@@ -133,7 +126,7 @@ class ChatViewModel(
                 ttsManager.speak(agentMsg, agentMessage.id)
                 it.copy(
                     messages = it.messages + agentMessage,
-                    isLoading = false
+                    base = it.base.copy(isLoading = false)
                 )
             }
         }

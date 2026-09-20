@@ -1,9 +1,19 @@
 package com.smile.englishtutor.mvi
 
-abstract class BaseUiState(
-    open val inputText: String = "",
-    open val isLoading: Boolean = false,
-    open val isListening: Boolean = false,
-    open val hasRecordAudioPermission: Boolean = false,
-    open val error: String? = null
+data class BaseCommonState(
+    val inputText: String = "",
+    val isLoading: Boolean = false,
+    val isListening: Boolean = false,
+    val hasRecordAudioPermission: Boolean = false,
+    val error: String? = null
 )
+
+abstract class BaseUiState<S>(open val base: BaseCommonState) {
+    val inputText get() = base.inputText
+    val isLoading get() = base.isLoading
+    val isListening get() = base.isListening
+    val hasRecordAudioPermission get() = base.hasRecordAudioPermission
+    val error get() = base.error
+
+    abstract fun updateBase(newBase: BaseCommonState): S
+}

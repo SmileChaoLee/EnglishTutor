@@ -3,6 +3,7 @@ package com.smile.englishtutor.viewmodels
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.smile.englishtutor.mvi.BaseCommonState
 import com.smile.englishtutor.mvi.BaseUiState
 import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.utilities.LogUtil
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-abstract class BaseViewModel<S : BaseUiState, I : BaseUserIntent>(
+abstract class BaseViewModel<S : BaseUiState<S>, I : BaseUserIntent>(
     application: Application,
     initialState: S
 ) : AndroidViewModel(application) {
@@ -44,11 +45,20 @@ abstract class BaseViewModel<S : BaseUiState, I : BaseUserIntent>(
         _state.update(reducer)
     }
 
-    protected abstract fun copyWithError(state: S, error: String?): S
-    protected abstract fun copyWithListeningStatus(state: S, isListening: Boolean): S
-    protected abstract fun copyWithInputText(state: S, text: String): S
-    protected abstract fun copyWithLoadingStatus(state: S, isLoading: Boolean): S
-    protected abstract fun copyWithPermissionStatus(state: S, hasPermission: Boolean): S
+    protected fun copyWithError(state: S, error: String?): S =
+        state.updateBase(state.base.copy(error = error))
+
+    protected fun copyWithListeningStatus(state: S, isListening: Boolean): S =
+        state.updateBase(state.base.copy(isListening = isListening))
+
+    protected fun copyWithInputText(state: S, text: String): S =
+        state.updateBase(state.base.copy(inputText = text))
+
+    protected fun copyWithLoadingStatus(state: S, isLoading: Boolean): S =
+        state.updateBase(state.base.copy(isLoading = isLoading))
+
+    protected fun copyWithPermissionStatus(state: S, hasPermission: Boolean): S =
+        state.updateBase(state.base.copy(hasRecordAudioPermission = hasPermission))
 
     protected fun toggleVoiceInput() {
         val isListening = _state.value.isListening

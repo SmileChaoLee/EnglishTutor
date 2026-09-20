@@ -16,12 +16,6 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
         handleIntent(StoryUserIntent.UpdateInput(text))
     }
 
-    override fun copyWithError(state: StoryUiState, error: String?): StoryUiState = state.copy(error = error)
-    override fun copyWithListeningStatus(state: StoryUiState, isListening: Boolean): StoryUiState = state.copy(isListening = isListening)
-    override fun copyWithInputText(state: StoryUiState, text: String): StoryUiState = state.copy(inputText = text)
-    override fun copyWithLoadingStatus(state: StoryUiState, isLoading: Boolean): StoryUiState = state.copy(isLoading = isLoading)
-    override fun copyWithPermissionStatus(state: StoryUiState, hasPermission: Boolean): StoryUiState = state.copy(hasRecordAudioPermission = hasPermission)
-
     override fun handleIntent(intent: StoryUserIntent) {
         when (intent) {
             is StoryUserIntent.UpdateInput -> {
@@ -36,8 +30,7 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
                     updateState {
                         it.copy(
                             videos = ytVideos,
-                            inputText = "",
-                            isLoading = false
+                            base = it.base.copy(inputText = "", isLoading = false)
                         )
                     }
                 }
