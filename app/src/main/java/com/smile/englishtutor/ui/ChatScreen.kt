@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.ChatViewModel
@@ -46,7 +47,7 @@ fun ChatScreen(
         LogUtil.d(TAG, "LaunchedEffect.state.error")
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.handleIntent(ChatUserIntent.ClearError)
+            viewModel.handleIntent(BaseUserIntent.ClearError)
         }
     }
 
@@ -105,9 +106,9 @@ fun ChatScreen(
                 isListening = state.isListening,
                 hasPermission = state.hasRecordAudioPermission,
                 fontSize = baseFontSize,
-                onInputChange = { viewModel.handleIntent(ChatUserIntent.UpdateInput(it)) },
+                onInputChange = { viewModel.handleIntent(BaseUserIntent.UpdateInput(it)) },
                 onSendClick = { viewModel.handleIntent(ChatUserIntent.SendMessage) },
-                onMicClick = { viewModel.handleIntent(ChatUserIntent.ToggleVoiceInput) }
+                onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
             )
         }
     }

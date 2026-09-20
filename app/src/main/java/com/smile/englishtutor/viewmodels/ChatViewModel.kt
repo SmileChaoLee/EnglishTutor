@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.smile.englishtutor.models.ChatMessage
 import com.smile.englishtutor.models.Constants
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.mvi.ChatUiState
 import com.smile.englishtutor.retrofit.RestApiSync
@@ -21,7 +22,7 @@ class ChatViewModel(
     override val TAG = "ChatViewModel"
 
     override fun onVoiceResult(text: String) {
-        handleIntent(ChatUserIntent.UpdateInput(text))
+        handleBaseIntent(BaseUserIntent.UpdateInput(text))
     }
 
     private val ttsManager = TextToSpeechManager(
@@ -50,22 +51,12 @@ class ChatViewModel(
         sendInitialMessage()
     }
 
-    override fun handleIntent(intent: ChatUserIntent) {
+    override fun handleIntent(intent: BaseUserIntent) {
+        if (handleBaseIntent(intent)) return
+        
         when (intent) {
-            is ChatUserIntent.UpdateInput -> {
-                updateState { copyWithInputText(it, intent.text) }
-            }
             ChatUserIntent.SendMessage -> {
                 sendMessage(_state.value.inputText)
-            }
-            ChatUserIntent.ToggleVoiceInput -> {
-                toggleVoiceInput()
-            }
-            is ChatUserIntent.UpdatePermissionStatus -> {
-                updateState { copyWithPermissionStatus(it, intent.hasPermission) }
-            }
-            ChatUserIntent.ClearError -> {
-                updateState { copyWithError(it, null) }
             }
             is ChatUserIntent.SpeakText -> {
                 ttsManager.speak(intent.text, intent.messageId)
@@ -76,6 +67,7 @@ class ChatViewModel(
                 LogUtil.d(TAG, "handleIntent.translateFrom = $translateFrom")
                 LogUtil.d(TAG, "handleIntent.translateTo = $translateTo")
             }
+            else -> {}
         }
     }
 

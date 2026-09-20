@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.smile.englishtutor.EnglishTutorApp
 import com.smile.englishtutor.R
 import com.smile.englishtutor.models.Constants
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.ui.ChatScreen
 import com.smile.englishtutor.ui.MyTopAppBar
@@ -84,7 +85,7 @@ class ChatActivity : ComponentActivity() {
             }
         }
         viewModel = ViewModelProvider(this, factory)[ChatViewModel::class.java]
-        viewModel.handleIntent(ChatUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
+        viewModel.handleIntent(BaseUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
         viewModel.handleIntent(ChatUserIntent.Translate(translateFrom = englishLanguage, translateTo = targetLanguage))
 
         setContent {

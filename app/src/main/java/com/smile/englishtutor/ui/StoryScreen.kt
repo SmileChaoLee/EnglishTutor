@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.smile.englishtutor.R
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.StoryUserIntent
 import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.StoryViewModel
@@ -61,7 +62,7 @@ fun StoryScreen(
         LogUtil.d(TAG, "LaunchedEffect.state.error")
         state.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.handleIntent(StoryUserIntent.ClearError)
+            viewModel.handleIntent(BaseUserIntent.ClearError)
         }
     }
 
@@ -137,9 +138,9 @@ fun StoryScreen(
                 isListening = state.isListening,
                 hasPermission = state.hasRecordAudioPermission,
                 fontSize = baseFontSize,
-                onInputChange = { viewModel.handleIntent(StoryUserIntent.UpdateInput(it)) },
+                onInputChange = { viewModel.handleIntent(BaseUserIntent.UpdateInput(it)) },
                 onSendClick = { viewModel.handleIntent(StoryUserIntent.SendMessage) },
-                onMicClick = { viewModel.handleIntent(StoryUserIntent.ToggleVoiceInput) }
+                onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
             )
         }
     }

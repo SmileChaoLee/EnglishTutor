@@ -26,10 +26,11 @@ abstract class BaseViewModel<S : BaseUiState<S>, I : BaseUserIntent>(
     protected val voiceToTextManager = VoiceToTextManager(
         context = application,
         onResult = { text ->
-            onVoiceResult(text)
+            handleBaseIntent(BaseUserIntent.UpdateInput(text))
         },
         onError = { error ->
             LogUtil.e(TAG, "voiceToTextManager.error = $error")
+            handleBaseIntent(BaseUserIntent.ClearError) // Example use, or keep old
             updateState { copyWithError(it, "Voice Error: $error") }
         },
         onListeningStatusChange = { isListening ->
@@ -37,7 +38,29 @@ abstract class BaseViewModel<S : BaseUiState<S>, I : BaseUserIntent>(
         }
     )
 
-    abstract fun handleIntent(intent: I)
+    abstract fun handleIntent(intent: BaseUserIntent)
+
+    protected fun handleBaseIntent(intent: BaseUserIntent): Boolean {
+        return when (intent) {
+            is BaseUserIntent.UpdateInput -> {
+                updateState { copyWithInputText(it, intent.text) }
+                true
+            }
+            BaseUserIntent.ToggleVoiceInput -> {
+                toggleVoiceInput()
+                true
+            }
+            is BaseUserIntent.UpdatePermissionStatus -> {
+                updateState { copyWithPermissionStatus(it, intent.hasPermission) }
+                true
+            }
+            BaseUserIntent.ClearError -> {
+                updateState { copyWithError(it, null) }
+                true
+            }
+            else -> false
+        }
+    }
 
     protected abstract fun onVoiceResult(text: String)
 

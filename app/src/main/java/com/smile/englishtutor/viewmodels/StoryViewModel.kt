@@ -2,6 +2,7 @@ package com.smile.englishtutor.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.viewModelScope
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.StoryUiState
 import com.smile.englishtutor.mvi.StoryUserIntent
 import com.smile.englishtutor.retrofit.U2bRestApiSync
@@ -13,14 +14,13 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
     override val TAG = "StoryViewModel"
 
     override fun onVoiceResult(text: String) {
-        handleIntent(StoryUserIntent.UpdateInput(text))
+        handleBaseIntent(BaseUserIntent.UpdateInput(text))
     }
 
-    override fun handleIntent(intent: StoryUserIntent) {
+    override fun handleIntent(intent: BaseUserIntent) {
+        if (handleBaseIntent(intent)) return
+        
         when (intent) {
-            is StoryUserIntent.UpdateInput -> {
-                updateState { copyWithInputText(it, intent.text) }
-            }
             is StoryUserIntent.SendMessage -> {
                 updateState { copyWithLoadingStatus(it, true) }
                 viewModelScope.launch(Dispatchers.IO) {
@@ -35,17 +35,7 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
                     }
                 }
             }
-            is StoryUserIntent.ToggleVoiceInput -> {
-                toggleVoiceInput()
-            }
-            is StoryUserIntent.UpdatePermissionStatus -> {
-                LogUtil.d(TAG, "handleIntent.StoryUserIntent.UpdatePermissionStatus")
-                updateState { copyWithPermissionStatus(it, intent.hasPermission) }
-            }
-            is StoryUserIntent.ClearError -> {
-                LogUtil.d(TAG, "handleIntent.StoryUserIntent.ClearError")
-                updateState { copyWithError(it, null) }
-            }
+            else -> {}
         }
     }
 }

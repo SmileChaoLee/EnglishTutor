@@ -18,7 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.smile.englishtutor.EnglishTutorApp
 import com.smile.englishtutor.R
 import com.smile.englishtutor.models.Constants
-import com.smile.englishtutor.mvi.StoryUserIntent
+import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.ui.MyTopAppBar
 import com.smile.englishtutor.ui.ShowAdmobBanner
 import com.smile.englishtutor.ui.StoryScreen
@@ -58,7 +58,7 @@ class StoryActivity : ComponentActivity() {
             }
         }
         viewModel = ViewModelProvider(this, factory)[StoryViewModel::class.java]
-        viewModel.handleIntent(StoryUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
+        viewModel.handleIntent(BaseUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
 
         setContent {
             EnglishTutorTheme {
