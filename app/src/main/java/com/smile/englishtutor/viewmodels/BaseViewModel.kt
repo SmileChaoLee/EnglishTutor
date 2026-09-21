@@ -7,6 +7,7 @@ import com.smile.englishtutor.mvi.BaseCommonState
 import com.smile.englishtutor.mvi.BaseUiState
 import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.utilities.LogUtil
+import com.smile.englishtutor.utilities.TextToSpeechManager
 import com.smile.englishtutor.utilities.VoiceToTextManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +23,17 @@ abstract class BaseViewModel<S : BaseUiState<S>, I : BaseUserIntent>(
     val state: StateFlow<S> = _state.asStateFlow()
 
     protected abstract val TAG: String
+
+    protected open fun onSpeechStart(id: String) {}
+    protected open fun onSpeechDone(id: String) {}
+    protected open fun onSpeechError(id: String) {}
+
+    protected val ttsManager = TextToSpeechManager(
+        context = application,
+        onSpeechStart = { id -> onSpeechStart(id) },
+        onSpeechDone = { id -> onSpeechDone(id) },
+        onSpeechError = { id -> onSpeechError(id) }
+    )
 
     protected val voiceToTextManager = VoiceToTextManager(
         context = application,
@@ -97,5 +109,6 @@ abstract class BaseViewModel<S : BaseUiState<S>, I : BaseUserIntent>(
     override fun onCleared() {
         super.onCleared()
         voiceToTextManager.destroy()
+        ttsManager.destroy()
     }
 }

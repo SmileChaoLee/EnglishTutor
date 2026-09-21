@@ -4,7 +4,8 @@ import com.smile.englishtutor.models.YouTubeVideo
 
 data class StoryUiState (
     override var base: BaseCommonState = BaseCommonState(),
-    val videos: List<YouTubeVideo> = emptyList()
+    val videos: List<YouTubeVideo> = emptyList(),
+    val isSpeaking: Boolean = false
 ) : BaseUiState<StoryUiState>(base) {
     override fun updateBase(newBase: BaseCommonState) = copy(base = newBase)
 }

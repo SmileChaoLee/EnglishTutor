@@ -14,6 +14,7 @@ class TextToSpeechManager(
 
     private var tts: TextToSpeech? = TextToSpeech(context, this)
     private var isInitialized = false
+    private var pendingSpeech: Pair<String, String>? = null
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
@@ -21,6 +22,10 @@ class TextToSpeechManager(
             if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
                 isInitialized = true
                 setupProgressListener()
+                pendingSpeech?.let { (text, id) ->
+                    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, id)
+                    pendingSpeech = null
+                }
             }
         }
     }
@@ -47,6 +52,8 @@ class TextToSpeechManager(
     fun speak(text: String, id: String) {
         if (isInitialized) {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, id)
+        } else {
+            pendingSpeech = Pair(text, id)
         }
     }
 

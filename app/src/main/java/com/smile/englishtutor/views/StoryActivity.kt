@@ -10,8 +10,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +45,7 @@ class StoryActivity : BaseActivity() {
     @Composable
     override fun CreateMainUI(modifier: Modifier) {
         val storyViewModel = viewModel as StoryViewModel
+        val state by storyViewModel.state.collectAsState()
         val text = getString(R.string.whatStoriesAreYouLookingFor)
         Column(modifier = modifier) {
             Row(
@@ -60,7 +65,8 @@ class StoryActivity : BaseActivity() {
                 }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = "Speak Out"
+                        contentDescription = "Speak Out",
+                        tint = if (state.isSpeaking) Color.Red else Color.Black
                     )
                 }
             }
@@ -69,6 +75,8 @@ class StoryActivity : BaseActivity() {
                 viewModel = storyViewModel
             )
         }
-        storyViewModel.handleIntent(StoryUserIntent.SpeakText(text))
+        LaunchedEffect(Unit) {
+            storyViewModel.handleIntent(StoryUserIntent.SpeakText(text))
+        }
     }
 }

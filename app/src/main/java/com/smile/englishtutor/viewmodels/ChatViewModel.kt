@@ -9,7 +9,6 @@ import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.mvi.ChatUiState
 import com.smile.englishtutor.retrofit.RestApiSync
 import com.smile.englishtutor.utilities.LogUtil
-import com.smile.englishtutor.utilities.TextToSpeechManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,18 +24,17 @@ class ChatViewModel(
         handleBaseIntent(BaseUserIntent.UpdateInput(text))
     }
 
-    private val ttsManager = TextToSpeechManager(
-        context = application,
-        onSpeechStart = { id ->
-            updateState { it.copy(speakingMessageId = id) }
-        },
-        onSpeechDone = { _ ->
-            updateState { it.copy(speakingMessageId = null) }
-        },
-        onSpeechError = { _ ->
-            updateState { it.copy(speakingMessageId = null) }
-        }
-    )
+    override fun onSpeechStart(id: String) {
+        updateState { it.copy(speakingMessageId = id) }
+    }
+
+    override fun onSpeechDone(id: String) {
+        updateState { it.copy(speakingMessageId = null) }
+    }
+
+    override fun onSpeechError(id: String) {
+        updateState { it.copy(speakingMessageId = null) }
+    }
 
     private var isInitial = true
     private var translateFrom: String? = null
@@ -69,11 +67,6 @@ class ChatViewModel(
             }
             else -> {}
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        ttsManager.destroy()
     }
 
     private fun sendInitialMessage() {
