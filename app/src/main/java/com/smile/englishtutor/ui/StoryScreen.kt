@@ -52,9 +52,9 @@ fun StoryScreen(
     val context = LocalContext.current
 
     LaunchedEffect(state.videos.size) {
-        LogUtil.d(TAG, "LaunchedEffect.state.messages.size")
+        LogUtil.d(TAG, "LaunchedEffect.state.videos.size")
         if (state.videos.isNotEmpty()) {
-            listState.animateScrollToItem(state.videos.size - 1)
+            listState.animateScrollToItem(0)
         }
     }
 
@@ -75,11 +75,17 @@ fun StoryScreen(
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        // Dynamic font size based on screen width and orientation
+        // Dynamic font size and spacing based on screen width and orientation
         val baseFontSize = when {
             screenWidth >= 800.dp && isLandscape -> 32.sp
             screenWidth >= 600.dp -> 24.sp
             else -> 16.sp
+        }
+
+        val itemSpacing = when {
+            screenWidth >= 800.dp && isLandscape -> 40.dp
+            screenWidth >= 600.dp -> 32.dp
+            else -> 20.dp
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -89,7 +95,7 @@ fun StoryScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(itemSpacing)
             ) {
                 items(state.videos) { video ->
                     Column(
