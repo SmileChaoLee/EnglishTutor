@@ -7,11 +7,21 @@ import com.smile.englishtutor.mvi.StoryUiState
 import com.smile.englishtutor.mvi.StoryUserIntent
 import com.smile.englishtutor.retrofit.U2bRestApiSync
 import com.smile.englishtutor.utilities.LogUtil
+import com.smile.englishtutor.utilities.TextToSpeechManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, StoryUserIntent>(application, StoryUiState()) {
+class StoryViewModel(
+    application: Application
+) : BaseViewModel<StoryUiState, StoryUserIntent>(application, StoryUiState()) {
     override val TAG = "StoryViewModel"
+
+    private val ttsManager = TextToSpeechManager(
+        context = application,
+        onSpeechStart = { _ -> },
+        onSpeechDone = { _ -> },
+        onSpeechError = { _ -> }
+    )
 
     override fun onVoiceResult(text: String) {
         handleBaseIntent(BaseUserIntent.UpdateInput(text))
@@ -35,7 +45,15 @@ class StoryViewModel(application: Application) : BaseViewModel<StoryUiState, Sto
                     }
                 }
             }
+            is StoryUserIntent.SpeakText -> {
+                ttsManager.speak(intent.text, "story_id")
+            }
             else -> {}
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        ttsManager.destroy()
     }
 }

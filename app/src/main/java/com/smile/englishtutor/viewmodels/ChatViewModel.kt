@@ -42,7 +42,7 @@ class ChatViewModel(
     private var translateFrom: String? = null
     private var translateTo: String? = null
     private val historyMessages = ArrayList<Map<String, String>>()
-    private val maxHistorySize = 10
+    private val maxHistorySize = 20
 
     init {
         isInitial = true
@@ -104,16 +104,18 @@ class ChatViewModel(
             }
             val response = withContext(Dispatchers.IO) {
                 RestApiSync.getAgentResponse(requestText, option, historyMessages)
-                // RestApiSync.getAgentResponse(requestText, option)
             }
             updateState {
                 val agentMsg = response?.agentResponse ?: "Error: No response from agent"
-                if (historyMessages.size >= maxHistorySize) {
+                val hSize = historyMessages.size
+                if (hSize >= maxHistorySize) {
+                    // because maxHistorySize >= 2, so we are able to do the following
+                    historyMessages.removeAt(1)
                     historyMessages.removeAt(0)
                 }
                 historyMessages.add(mapOf("role" to "user", "content" to requestText))
                 historyMessages.add(mapOf("role" to "assistant", "content" to agentMsg))
-
+                LogUtil.d(TAG,"historyMessages.size = ${historyMessages.size}")
                 val agentMessage = ChatMessage(text = agentMsg, isUser = false)
                 ttsManager.speak(agentMsg, agentMessage.id)
                 it.copy(

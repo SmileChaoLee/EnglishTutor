@@ -6,4 +6,5 @@
     <string name="translationStr">Translation</string>
     <string name="englishStoryStr">English Stories</string>
     <string name="title_activity_story">StoryActivity</string>
+    <string name="whatStoriesAreYouLookingFor">"What stories are you looking for?"</string>
 </resources>
