@@ -42,7 +42,18 @@ abstract class BaseActivity : ComponentActivity() {
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
+        val deviceType = ScreenUtil.getDeviceType(this@BaseActivity)
+        LogUtil.d(TAG, "onCreate.requestedOrientation")
+        requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
+            // phone then change orientation to Portrait
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            // Table then change orientation to Landscape
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         LogUtil.d(TAG, "onCreate.savedInstanceState = $savedInstanceState")
         hasRecordAudioPermission = false
@@ -90,17 +101,6 @@ abstract class BaseActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-
-        LogUtil.d(TAG, "onCreate.ScreenUtil.getDeviceType")
-        val deviceType = ScreenUtil.getDeviceType(this@BaseActivity)
-        LogUtil.d(TAG, "onCreate.requestedOrientation")
-        requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
-            // phone then change orientation to Portrait
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        } else {
-            // Table then change orientation to Landscape
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
     }
 

@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,13 +50,13 @@ fun StoryScreen(
     viewModel: StoryViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
     val context = LocalContext.current
 
     LaunchedEffect(state.videos.size) {
         LogUtil.d(TAG, "LaunchedEffect.state.videos.size")
         if (state.videos.isNotEmpty()) {
-            listState.animateScrollToItem(0)
+            gridState.animateScrollToItem(0)
         }
     }
 
@@ -88,14 +90,19 @@ fun StoryScreen(
             else -> 20.dp
         }
 
+        val columns = if (isLandscape) 3 else 1
+        val itemWidth = if (isLandscape) (screenWidth - 16.dp - (itemSpacing * 2)) / 3 else screenWidth - 16.dp
+
         Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                state = listState,
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
+                state = gridState,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(itemSpacing)
+                verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                horizontalArrangement = Arrangement.spacedBy(itemSpacing)
             ) {
                 items(state.videos) { video ->
                     Column(
@@ -110,7 +117,7 @@ fun StoryScreen(
                             error = painterResource(R.drawable.video_image),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height((screenWidth * 0.56f).coerceIn(180.dp, 400.dp)),
+                                .height((itemWidth * 0.56f).coerceIn(120.dp, 400.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Text(
@@ -123,7 +130,7 @@ fun StoryScreen(
                     }
                 }
                 if (state.isLoading) {
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         // Make spinner size relative to screen width (e.g., 15% of width)
                         // Constrained between 48dp and 120dp
                         val spinnerSize = (screenWidth * 0.15f).coerceIn(48.dp, 120.dp)
