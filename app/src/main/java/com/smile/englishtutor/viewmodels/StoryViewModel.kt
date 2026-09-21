@@ -53,6 +53,9 @@ class StoryViewModel(
                 updateState { it.copy(isSpeaking = true) }
                 ttsManager.speak(intent.text, "story_id")
             }
+            is StoryUserIntent.PlayVideo -> {
+                updateState { it.copy(selectedVideoId = intent.videoId) }
+            }
             else -> {}
         }
     }

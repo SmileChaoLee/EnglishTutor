@@ -35,7 +35,11 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.ads.AdView
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.smile.englishtutor.models.ChatMessage
 import com.smile.smilelibraries.AdMobBanner
 
@@ -48,6 +52,27 @@ fun MyTopAppBar(title: String) {
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = Color(0xFF00FF00),
         )
+    )
+}
+
+@Composable
+fun YouTubePlayer(
+    videoId: String,
+    lifecycleOwner: LifecycleOwner,
+    modifier: Modifier = Modifier
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            YouTubePlayerView(context = context).apply {
+                lifecycleOwner.lifecycle.addObserver(this)
+                addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        youTubePlayer.loadVideo(videoId, 0f)
+                    }
+                })
+            }
+        }
     )
 }
 

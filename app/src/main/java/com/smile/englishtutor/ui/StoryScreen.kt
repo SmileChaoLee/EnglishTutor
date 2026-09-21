@@ -3,10 +3,12 @@ package com.smile.englishtutor.ui
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +36,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.smile.englishtutor.R
@@ -109,6 +113,9 @@ fun StoryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp)
+                            .clickable {
+                                viewModel.handleIntent(StoryUserIntent.PlayVideo(video.id))
+                            }
                     ) {
                         AsyncImage(
                             model = video.thumbnail,
@@ -155,6 +162,28 @@ fun StoryScreen(
                 onSendClick = { viewModel.handleIntent(StoryUserIntent.GetStories) },
                 onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
             )
+        }
+    }
+
+    state.selectedVideoId?.let { videoId ->
+        Dialog(
+            onDismissRequest = { viewModel.handleIntent(StoryUserIntent.PlayVideo(null)) },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                YouTubePlayer(
+                    videoId = videoId,
+                    lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                )
+            }
         }
     }
 }
