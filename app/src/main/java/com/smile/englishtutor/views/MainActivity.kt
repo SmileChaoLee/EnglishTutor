@@ -243,8 +243,7 @@ class MainActivity : ComponentActivity() {
             ChatActivity::class.java
         ).also {
             disableMainButtons()
-            it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, Constants.CONVERSATION_OPTION)
+            intentExtras(it, Constants.CONVERSATION_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
             chatActivityLauncher.launch(it)
         }
@@ -256,8 +255,7 @@ class MainActivity : ComponentActivity() {
             ChatActivity::class.java
         ).also {
             disableMainButtons()
-            it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, Constants.GRAMMAR_OPTION)
+            intentExtras(it, Constants.GRAMMAR_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
             chatActivityLauncher.launch(it)
         }
@@ -269,8 +267,7 @@ class MainActivity : ComponentActivity() {
             ChatActivity::class.java
         ).also {
             disableMainButtons()
-            it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
-            it.putExtra(Constants.OPTION, Constants.TRANSLATION_OPTION)
+            intentExtras(it, Constants.TRANSLATION_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
             chatActivityLauncher.launch(it)
         }
@@ -282,10 +279,15 @@ class MainActivity : ComponentActivity() {
             StoryActivity::class.java
         ).also {
             disableMainButtons()
-            it.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
+            intentExtras(it, Constants.STORY_OPTION)
             loadingMessage.value = getString(R.string.loadingStr)
             storyActivityLauncher.launch(it)
         }
+    }
+
+    private fun intentExtras(i: Intent, option: Int) {
+        i.putExtra(Constants.HAS_PERMISSION, hasRecordAudioPermission)
+        i.putExtra(Constants.OPTION, option)
     }
 
     @Composable
