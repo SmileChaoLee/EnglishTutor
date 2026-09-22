@@ -3,7 +3,6 @@ package com.smile.englishtutor.viewmodels
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.smile.englishtutor.mvi.BaseCommonState
 import com.smile.englishtutor.mvi.BaseUiState
 import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.utilities.LogUtil
