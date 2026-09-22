@@ -36,8 +36,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.smile.englishtutor.R
@@ -98,90 +96,84 @@ fun StoryScreen(
         val itemWidth = if (isLandscape) (screenWidth - 16.dp - (itemSpacing * 2)) / 3 else screenWidth - 16.dp
 
         Column(modifier = Modifier.fillMaxSize()) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
-                state = gridState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(itemSpacing),
-                horizontalArrangement = Arrangement.spacedBy(itemSpacing)
-            ) {
-                items(state.videos) { video ->
-                    Column(
+            if (state.selectedVideoId != null) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(Color.Black),
+                    contentAlignment = Alignment.Center
+                ) {
+                    YouTubePlayer(
+                        videoId = state.selectedVideoId!!,
+                        lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                            .clickable {
-                                viewModel.handleIntent(StoryUserIntent.PlayVideo(video.id))
-                            }
-                    ) {
-                        AsyncImage(
-                            model = video.thumbnail,
-                            contentDescription = video.title,
-                            placeholder = painterResource(R.drawable.video_image),
-                            error = painterResource(R.drawable.video_image),
+                            .aspectRatio(16 / 9f)
+                    )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columns),
+                    state = gridState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                    horizontalArrangement = Arrangement.spacedBy(itemSpacing)
+                ) {
+                    items(state.videos) { video ->
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height((itemWidth * 0.56f).coerceIn(120.dp, 400.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        Text(
-                            text = video.title,
-                            color = Color.White,
-                            fontSize = baseFontSize,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                }
-                if (state.isLoading) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        // Make spinner size relative to screen width (e.g., 15% of width)
-                        // Constrained between 48dp and 120dp
-                        val spinnerSize = (screenWidth * 0.15f).coerceIn(48.dp, 120.dp)
-                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(spinnerSize),
+                                .padding(bottom = 16.dp)
+                                .clickable {
+                                    viewModel.handleIntent(StoryUserIntent.PlayVideo(video.id))
+                                }
+                        ) {
+                            AsyncImage(
+                                model = video.thumbnail,
+                                contentDescription = video.title,
+                                placeholder = painterResource(R.drawable.video_image),
+                                error = painterResource(R.drawable.video_image),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height((itemWidth * 0.56f).coerceIn(120.dp, 400.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                            Text(
+                                text = video.title,
                                 color = Color.White,
-                                strokeWidth = (spinnerSize / 10).coerceAtLeast(4.dp)
+                                fontSize = baseFontSize,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 8.dp)
                             )
                         }
                     }
+                    if (state.isLoading) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            val spinnerSize = (screenWidth * 0.15f).coerceIn(48.dp, 120.dp)
+                            Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(spinnerSize),
+                                    color = Color.White,
+                                    strokeWidth = (spinnerSize / 10).coerceAtLeast(4.dp)
+                                )
+                            }
+                        }
+                    }
                 }
-            }
 
-            InputArea(
-                modifier = Modifier.wrapContentHeight(),
-                inputText = state.inputText,
-                isListening = state.isListening,
-                hasPermission = state.hasRecordAudioPermission,
-                fontSize = baseFontSize,
-                onInputChange = { viewModel.handleIntent(BaseUserIntent.UpdateInput(it)) },
-                onSendClick = { viewModel.handleIntent(StoryUserIntent.GetStories) },
-                onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
-            )
-        }
-    }
-
-    state.selectedVideoId?.let { videoId ->
-        Dialog(
-            onDismissRequest = { viewModel.handleIntent(StoryUserIntent.PlayVideo(null)) },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                YouTubePlayer(
-                    videoId = videoId,
-                    lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16 / 9f)
+                InputArea(
+                    modifier = Modifier.wrapContentHeight(),
+                    inputText = state.inputText,
+                    isListening = state.isListening,
+                    hasPermission = state.hasRecordAudioPermission,
+                    fontSize = baseFontSize,
+                    onInputChange = { viewModel.handleIntent(BaseUserIntent.UpdateInput(it)) },
+                    onSendClick = { viewModel.handleIntent(StoryUserIntent.GetStories) },
+                    onMicClick = { viewModel.handleIntent(BaseUserIntent.ToggleVoiceInput) }
                 )
             }
         }

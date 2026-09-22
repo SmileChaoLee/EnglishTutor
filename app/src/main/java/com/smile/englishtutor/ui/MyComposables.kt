@@ -1,7 +1,6 @@
 package com.smile.englishtutor.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,38 +8,43 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.view.View
 import com.google.android.gms.ads.AdView
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.FullscreenListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import com.smile.englishtutor.models.ChatMessage
 import com.smile.smilelibraries.AdMobBanner
 
 @Composable
@@ -61,69 +65,78 @@ fun YouTubePlayer(
     lifecycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            YouTubePlayerView(context = context).apply {
-                lifecycleOwner.lifecycle.addObserver(this)
-                addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-                    override fun onReady(youTubePlayer: YouTubePlayer) {
-                        youTubePlayer.loadVideo(videoId, 0f)
-                    }
-                })
+    val context = LocalContext.current
+    val activity = remember(context) {
+        var c = context
+        while (c is android.content.ContextWrapper) {
+            if (c is android.app.Activity) {
+                break
             }
+            c = c.baseContext
         }
-    )
-}
+        c as? android.app.Activity
+    }
+    var fullscreenViewToShow by remember { mutableStateOf<View?>(null) }
+    var shouldResumePlayback by remember { mutableStateOf(false) }
 
-@Composable
-fun ChatBubble(
-    message: ChatMessage,
-    isSpeaking: Boolean,
-    fontSize: TextUnit = 16.sp,
-    onSpeakClick: () -> Unit
-) {
-    val alignment = if (message.isUser) Alignment.End else Alignment.Start
-    val color = if (message.isUser) Color(0xFF3700B3) else Color(0xFF424242)
-    val textColor = Color.White
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        AndroidView(
+            modifier = modifier,
+            factory = { ctx ->
+                YouTubePlayerView(context = ctx).apply {
+                    enableAutomaticInitialization = false
+                    lifecycleOwner.lifecycle.addObserver(this)
+                    
+                    addFullscreenListener(object : FullscreenListener {
+                        override fun onEnterFullscreen(fullscreenView: View, exitFullscreen: () -> Unit) {
+                            shouldResumePlayback = true
+                            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            fullscreenViewToShow = fullscreenView
+                        }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        horizontalAlignment = alignment
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start
-        ) {
-            if (!message.isUser) {
-                val volumeIconSize = (fontSize.value * 1.5f).dp * 2
-                IconButton(
-                    onClick = onSpeakClick,
-                    modifier = Modifier.size(volumeIconSize)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = "Speak",
-                        tint = if (isSpeaking) Color.Red else Color.White,
-                        modifier = Modifier.fillMaxSize().padding(4.dp)
-                    )
+                        override fun onExitFullscreen() {
+                            val currentActivity = activity ?: (ctx as? Activity)
+                            val deviceType = currentActivity?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) }
+                            activity?.requestedOrientation = if (deviceType == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE) {
+                                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            } else {
+                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            }
+                            fullscreenViewToShow = null
+                        }
+                    })
+
+                    val options = IFramePlayerOptions.Builder(ctx)
+                        .controls(1)
+                        .fullscreen(1)
+                        .build()
+
+                    initialize(object : AbstractYouTubePlayerListener() {
+                        override fun onReady(youTubePlayer: YouTubePlayer) {
+                            youTubePlayer.loadVideo(videoId, 0f)
+                        }
+
+                        override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+                            if (shouldResumePlayback && state == PlayerConstants.PlayerState.PAUSED) {
+                                youTubePlayer.play()
+                                shouldResumePlayback = false
+                            } else if (state == PlayerConstants.PlayerState.PLAYING) {
+                                shouldResumePlayback = false
+                            }
+                        }
+                    }, options)
                 }
             }
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = color,
-                tonalElevation = 2.dp
-            ) {
-                Text(
-                    text = message.text,
-                    modifier = Modifier.padding(12.dp),
-                    color = textColor,
-                    fontSize = fontSize,
-                    lineHeight = (fontSize.value + 3).sp
-                )
-            }
+        )
+
+        fullscreenViewToShow?.let { view ->
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    (view.parent as? android.view.ViewGroup)?.removeView(view)
+                    view
+                }
+            )
         }
     }
 }
@@ -199,17 +212,20 @@ fun InputArea(
 fun ShowAdmobBanner(modifier: Modifier = Modifier,
                     bannerID: String) {
     if (bannerID.isEmpty()) return
+    /*
+    // do not use the following because the app crashes when the orientation changes
     val adWidth = with(LocalDensity.current) {
         (LocalWindowInfo.current.containerSize.width
             .toDp().value*0.90f).toInt()
     }
+    */
     AndroidView(
         modifier = modifier,
         factory = { context ->
             AdView(context)
         },
         update = { adView ->
-            AdMobBanner(adView, bannerID, adWidth)
+            AdMobBanner(adView, bannerID, 0)
         }
     )
 }
