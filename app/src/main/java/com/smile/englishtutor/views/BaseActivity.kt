@@ -8,18 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.smile.englishtutor.EnglishTutorApp
 import com.smile.englishtutor.R
 import com.smile.englishtutor.models.Constants
-import com.smile.englishtutor.ui.MyTopAppBar
 import com.smile.englishtutor.ui.ShowAdmobBanner
 import com.smile.englishtutor.ui.theme.EnglishTutorTheme
 import com.smile.englishtutor.utilities.LogUtil
@@ -35,6 +31,8 @@ abstract class BaseActivity : ComponentActivity() {
     abstract fun initViewModel()
     @Composable
     abstract fun CreateMainUI(modifier: Modifier)
+    @Composable
+    abstract fun ActivityScaffold(title: String, content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit)
 
     protected var hasRecordAudioPermission = false
     protected var option: Int = Constants.CONVERSATION_OPTION
@@ -83,11 +81,7 @@ abstract class BaseActivity : ComponentActivity() {
                     Constants.STORY_OPTION -> getString(R.string.englishStoryStr)
                     else -> "Wrong option!"
                 }
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = { MyTopAppBar(title) },
-                    contentWindowInsets = WindowInsets.safeDrawing
-                ) { innerPadding ->
+                ActivityScaffold(title = title) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()

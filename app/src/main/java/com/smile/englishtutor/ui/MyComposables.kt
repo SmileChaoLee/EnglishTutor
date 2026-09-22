@@ -63,18 +63,19 @@ fun MyTopAppBar(title: String) {
 fun YouTubePlayer(
     videoId: String,
     lifecycleOwner: LifecycleOwner,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFullscreenChange: ((Boolean) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val activity = remember(context) {
         var c = context
         while (c is android.content.ContextWrapper) {
-            if (c is android.app.Activity) {
+            if (c is Activity) {
                 break
             }
             c = c.baseContext
         }
-        c as? android.app.Activity
+        c as? Activity
     }
     var fullscreenViewToShow by remember { mutableStateOf<View?>(null) }
     var shouldResumePlayback by remember { mutableStateOf(false) }
@@ -92,6 +93,7 @@ fun YouTubePlayer(
                             shouldResumePlayback = true
                             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                             fullscreenViewToShow = fullscreenView
+                            onFullscreenChange?.invoke(true)
                         }
 
                         override fun onExitFullscreen() {
@@ -103,6 +105,7 @@ fun YouTubePlayer(
                                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                             }
                             fullscreenViewToShow = null
+                            onFullscreenChange?.invoke(false)
                         }
                     })
 

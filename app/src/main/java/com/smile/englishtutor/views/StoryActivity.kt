@@ -22,8 +22,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.StoryUserIntent
 import com.smile.englishtutor.ui.StoryScreen
+import com.smile.englishtutor.ui.MyTopAppBar
 import com.smile.englishtutor.viewmodels.StoryViewModel
 import com.smile.englishtutor.R
+import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 
 class StoryActivity : BaseActivity() {
 
@@ -78,5 +83,21 @@ class StoryActivity : BaseActivity() {
         LaunchedEffect(Unit) {
             storyViewModel.handleIntent(StoryUserIntent.SpeakText(text))
         }
+    }
+
+    @Composable
+    override fun ActivityScaffold(title: String, content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit) {
+        val storyViewModel = viewModel as StoryViewModel
+        val state by storyViewModel.state.collectAsState()
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                if (!state.isFullScreen) {
+                    MyTopAppBar(title)
+                }
+            },
+            contentWindowInsets = WindowInsets.safeDrawing,
+            content = content
+        )
     }
 }

@@ -56,6 +56,9 @@ class StoryViewModel(
             is StoryUserIntent.PlayVideo -> {
                 updateState { it.copy(selectedVideoId = intent.videoId) }
             }
+            is StoryUserIntent.UpdateFullScreen -> {
+                updateState { it.copy(isFullScreen = intent.isFullScreen) }
+            }
             else -> {}
         }
     }

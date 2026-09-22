@@ -109,7 +109,10 @@ fun StoryScreen(
                         lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
+                            .aspectRatio(16 / 9f),
+                        onFullscreenChange = { isFullScreen ->
+                            viewModel.handleIntent(StoryUserIntent.UpdateFullScreen(isFullScreen))
+                        }
                     )
                 }
             } else {

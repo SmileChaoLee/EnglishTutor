@@ -25,8 +25,13 @@ import com.smile.englishtutor.models.Constants
 import com.smile.englishtutor.mvi.BaseUserIntent
 import com.smile.englishtutor.mvi.ChatUserIntent
 import com.smile.englishtutor.ui.ChatScreen
+import com.smile.englishtutor.ui.MyTopAppBar
 import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.ChatViewModel
+import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 
 class ChatActivity : BaseActivity() {
 
@@ -57,6 +62,16 @@ class ChatActivity : BaseActivity() {
         ChatScreen(
             modifier = modifier,
             viewModel = viewModel as ChatViewModel
+        )
+    }
+
+    @Composable
+    override fun ActivityScaffold(title: String, content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { MyTopAppBar(title) },
+            contentWindowInsets = WindowInsets.safeDrawing,
+            content = content
         )
     }
 
