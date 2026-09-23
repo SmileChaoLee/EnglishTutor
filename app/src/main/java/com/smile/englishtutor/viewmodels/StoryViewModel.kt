@@ -38,7 +38,7 @@ class StoryViewModel(
             is StoryUserIntent.GetStories -> {
                 updateState { copyWithLoadingStatus(it, true) }
                 viewModelScope.launch(Dispatchers.IO) {
-                    val searchTerm = "Stories about ${_state.value.inputText}"
+                    val searchTerm = "English stories about ${_state.value.inputText}"
                     val ytVideos = U2bRestApiSync.getVideos(searchTerm)
                     LogUtil.d(TAG, "SendMessage.ytVideos.size = ${ytVideos.size}")
                     updateState {
@@ -54,7 +54,10 @@ class StoryViewModel(
                 ttsManager.speak(intent.text, "story_id")
             }
             is StoryUserIntent.PlayVideo -> {
-                updateState { it.copy(selectedVideoId = intent.videoId) }
+                updateState { it.copy(selectedVideoId = intent.videoId, isFullScreen = if (intent.videoId == null) false else it.isFullScreen) }
+            }
+            is StoryUserIntent.CloseVideo -> {
+                updateState { it.copy(selectedVideoId = null, isFullScreen = false) }
             }
             is StoryUserIntent.UpdateFullScreen -> {
                 updateState { it.copy(isFullScreen = intent.isFullScreen) }

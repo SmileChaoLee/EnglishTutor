@@ -1,7 +1,10 @@
 package com.smile.englishtutor.ui
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +73,15 @@ fun StoryScreen(
         }
     }
 
+    BackHandler(enabled = state.selectedVideoId != null) {
+        val currentActivity = context as? Activity
+        val deviceType = currentActivity?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) }
+        if (deviceType == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE) {
+            currentActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+        viewModel.handleIntent(StoryUserIntent.CloseVideo)
+    }
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -108,8 +120,8 @@ fun StoryScreen(
                         videoId = state.selectedVideoId!!,
                         lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f),
+                            .fillMaxSize()
+                            .aspectRatio(16 / 9f, matchHeightConstraintsFirst = isLandscape),
                         onFullscreenChange = { isFullScreen ->
                             viewModel.handleIntent(StoryUserIntent.UpdateFullScreen(isFullScreen))
                         }

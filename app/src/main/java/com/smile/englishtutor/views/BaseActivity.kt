@@ -38,10 +38,18 @@ abstract class BaseActivity : ComponentActivity() {
     protected var option: Int = Constants.CONVERSATION_OPTION
     protected lateinit var viewModel: BaseViewModel<*, *>
 
+    @Composable
+    protected open fun BottomBannerArea() {
+        ShowAdmobBanner(
+            modifier = Modifier.fillMaxWidth(),
+            bannerID = EnglishTutorApp.ADMOB_BANNER_ID
+        )
+    }
+
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         val deviceType = ScreenUtil.getDeviceType(this@BaseActivity)
-        LogUtil.d(TAG, "onCreate.requestedOrientation")
+        LogUtil.d(TAG, "onCreate.requestedOrientation.deviceType = $deviceType")
         requestedOrientation = if (deviceType == ScreenUtil.DEVICE_TYPE_PHONE) {
             // phone then change orientation to Portrait
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -88,10 +96,7 @@ abstract class BaseActivity : ComponentActivity() {
                             .padding(innerPadding)
                     ) {
                         CreateMainUI(modifier = Modifier.weight(1f))
-                        ShowAdmobBanner(
-                            modifier = Modifier.fillMaxWidth(),
-                            bannerID = EnglishTutorApp.ADMOB_BANNER_ID
-                        )
+                        BottomBannerArea()
                     }
                 }
             }

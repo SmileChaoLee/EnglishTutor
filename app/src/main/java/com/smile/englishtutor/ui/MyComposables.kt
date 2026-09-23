@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,13 +49,28 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import com.smile.smilelibraries.AdMobBanner
 
 @Composable
-fun MyTopAppBar(title: String) {
+fun MyTopAppBar(
+    title: String,
+    onBackClick: (() -> Unit)? = null
+) {
     @OptIn(ExperimentalMaterial3Api::class)
     TopAppBar(
         title = { Text(text = title, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+        navigationIcon = {
+            if (onBackClick != null) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+            }
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = Color(0xFF00FF00),
+            navigationIconContentColor = Color.White
         )
     )
 }
@@ -77,6 +93,12 @@ fun YouTubePlayer(
         }
         c as? Activity
     }
+    val deviceType = remember(activity, context) {
+        val act = activity ?: (context as? Activity)
+        act?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) } ?: com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE
+    }
+    val isPhone = deviceType == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE
+
     var fullscreenViewToShow by remember { mutableStateOf<View?>(null) }
     var shouldResumePlayback by remember { mutableStateOf(false) }
 
@@ -98,8 +120,8 @@ fun YouTubePlayer(
 
                         override fun onExitFullscreen() {
                             val currentActivity = activity ?: (ctx as? Activity)
-                            val deviceType = currentActivity?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) }
-                            activity?.requestedOrientation = if (deviceType == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE) {
+                            val currentDeviceType = currentActivity?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) }
+                            activity?.requestedOrientation = if (currentDeviceType == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE) {
                                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                             } else {
                                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -111,12 +133,19 @@ fun YouTubePlayer(
 
                     val options = IFramePlayerOptions.Builder(ctx)
                         .controls(1)
-                        .fullscreen(1)
+                        .fullscreen(if (!isPhone) 0 else 1)
                         .build()
 
                     initialize(object : AbstractYouTubePlayerListener() {
                         override fun onReady(youTubePlayer: YouTubePlayer) {
                             youTubePlayer.loadVideo(videoId, 0f)
+                            /*
+                            if (isPhone) {
+                                post {
+                                    this@apply.matchParent()
+                                }
+                            }
+                            */
                         }
 
                         override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
@@ -129,6 +158,12 @@ fun YouTubePlayer(
                         }
                     }, options)
                 }
+            },
+            onRelease = { view ->
+                if (isPhone) {
+                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                }
+                view.release()
             }
         )
 
