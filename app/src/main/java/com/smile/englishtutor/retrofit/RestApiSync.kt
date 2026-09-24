@@ -42,9 +42,9 @@ object RestApiSync {
         history: List<Map<String, String>>
     ): AgentResponse? {
         val logStr = "getAgentResponse"
-        LogUtil.d(TAG, "$logStr.userPrompt = $userPrompt")
-        LogUtil.d(TAG, "$logStr.option = $option")
-        LogUtil.d(TAG, "$logStr.history = $history")
+        LogUtil.i(TAG, "$logStr.userPrompt = $userPrompt")
+        LogUtil.i(TAG, "$logStr.option = $option")
+        LogUtil.i(TAG, "$logStr.history = $history")
         val request = NewAgentRequest(userPrompt, option, history)
         val api = getApiInstance()
         var agentResponse: AgentResponse? = null

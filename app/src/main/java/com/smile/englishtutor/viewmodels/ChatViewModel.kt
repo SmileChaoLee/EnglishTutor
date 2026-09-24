@@ -62,8 +62,8 @@ class ChatViewModel(
             is ChatUserIntent.Translate -> {
                 translateFrom = intent.translateFrom
                 translateTo = intent.translateTo
-                LogUtil.d(TAG, "handleIntent.translateFrom = $translateFrom")
-                LogUtil.d(TAG, "handleIntent.translateTo = $translateTo")
+                LogUtil.i(TAG, "handleIntent.translateFrom = $translateFrom")
+                LogUtil.i(TAG, "handleIntent.translateTo = $translateTo")
             }
             else -> {}
         }
@@ -96,6 +96,8 @@ class ChatViewModel(
                 requestText  = "Translate $text from $translateFrom to $translateTo"
             }
             val response = withContext(Dispatchers.IO) {
+                LogUtil.i(TAG,"sendMessage.option = $option")
+                LogUtil.i(TAG,"sendMessage.requestText = $requestText")
                 RestApiSync.getAgentResponse(requestText, option, historyMessages)
             }
             updateState {
@@ -108,7 +110,7 @@ class ChatViewModel(
                 }
                 historyMessages.add(mapOf("role" to "user", "content" to requestText))
                 historyMessages.add(mapOf("role" to "assistant", "content" to agentMsg))
-                LogUtil.d(TAG,"historyMessages.size = ${historyMessages.size}")
+                LogUtil.i(TAG,"historyMessages.size = ${historyMessages.size}")
                 val agentMessage = ChatMessage(text = agentMsg, isUser = false)
                 ttsManager.speak(agentMsg, agentMessage.id)
                 it.copy(
