@@ -51,6 +51,8 @@ class StoryActivity : BaseActivity() {
         const val TAG = "StoryActivity"
     }
 
+    private lateinit var storyViewModel: StoryViewModel
+
     override fun initViewModel() {
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -60,14 +62,12 @@ class StoryActivity : BaseActivity() {
         }
         viewModel = ViewModelProvider(this, factory)[StoryViewModel::class.java]
         viewModel.handleIntent(BaseUserIntent.UpdatePermissionStatus(hasRecordAudioPermission))
+        storyViewModel = viewModel as StoryViewModel
     }
 
     @Composable
     override fun BottomBannerArea() {
-        val storyViewModel = viewModel as StoryViewModel
         val state by storyViewModel.state.collectAsState()
-        val configuration = LocalConfiguration.current
-        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val context = LocalContext.current
         val activity = context as? Activity
         val isPhone = activity?.let { com.smile.smilelibraries.utilities.ScreenUtil.getDeviceType(it) == com.smile.smilelibraries.utilities.ScreenUtil.DEVICE_TYPE_PHONE } ?: false
@@ -81,7 +81,7 @@ class StoryActivity : BaseActivity() {
         }
 
         if (state.selectedVideoId != null && (!state.isFullScreen || isPhone)) {
-            if (isLandscape) {
+            if (isLandscape()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -149,7 +149,6 @@ class StoryActivity : BaseActivity() {
 
     @Composable
     override fun CreateMainUI(modifier: Modifier) {
-        val storyViewModel = viewModel as StoryViewModel
         val state by storyViewModel.state.collectAsState()
         val text = getString(R.string.whatStoriesAreYouLookingFor)
         Column(modifier = modifier) {
@@ -189,11 +188,8 @@ class StoryActivity : BaseActivity() {
 
     @Composable
     override fun ActivityScaffold(title: String, content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit) {
-        val storyViewModel = viewModel as StoryViewModel
         val state by storyViewModel.state.collectAsState()
-        val configuration = LocalConfiguration.current
-        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val showTopBar = !state.isFullScreen && !(state.selectedVideoId != null && isLandscape)
+        val showTopBar = !state.isFullScreen && !(state.selectedVideoId != null && isLandscape())
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -210,5 +206,11 @@ class StoryActivity : BaseActivity() {
             contentWindowInsets = WindowInsets.safeDrawing,
             content = content
         )
+    }
+
+    @Composable
+    private fun isLandscape(): Boolean {
+        val config = LocalConfiguration.current
+        return config.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 }

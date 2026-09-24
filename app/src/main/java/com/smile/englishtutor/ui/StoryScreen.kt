@@ -48,6 +48,11 @@ import com.smile.englishtutor.utilities.LogUtil
 import com.smile.englishtutor.viewmodels.StoryViewModel
 
 private const val TAG = "StoryScreen"
+private const val SPINNER_SCALE = 0.15f
+private val SPINNER_MIN_SIZE = 48.dp
+private val SPINNER_MAX_SIZE = 120.dp
+private val VIDEO_THUMBNAIL_MIN_HEIGHT = 120.dp
+private val VIDEO_THUMBNAIL_MAX_HEIGHT = 400.dp
 
 @Composable
 fun StoryScreen(
@@ -88,8 +93,7 @@ fun StoryScreen(
             .background(Color.Black)
     ) {
         val screenWidth = maxWidth
-        val configuration = LocalConfiguration.current
-        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         // Dynamic font size and spacing based on screen width and orientation
         val baseFontSize = when {
@@ -106,6 +110,8 @@ fun StoryScreen(
 
         val columns = if (isLandscape) 3 else 1
         val itemWidth = if (isLandscape) (screenWidth - 16.dp - (itemSpacing * 2)) / 3 else screenWidth - 16.dp
+        val thumbnailHeight = (itemWidth * 0.56f).coerceIn(VIDEO_THUMBNAIL_MIN_HEIGHT, VIDEO_THUMBNAIL_MAX_HEIGHT)
+        val spinnerSize = (screenWidth * SPINNER_SCALE).coerceIn(SPINNER_MIN_SIZE, SPINNER_MAX_SIZE)
 
         Column(modifier = Modifier.fillMaxSize()) {
             if (state.selectedVideoId != null) {
@@ -154,7 +160,7 @@ fun StoryScreen(
                                 error = painterResource(R.drawable.video_image),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height((itemWidth * 0.56f).coerceIn(120.dp, 400.dp)),
+                                    .height(thumbnailHeight),
                                 contentScale = ContentScale.Crop
                             )
                             Text(
@@ -168,7 +174,6 @@ fun StoryScreen(
                     }
                     if (state.isLoading) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            val spinnerSize = (screenWidth * 0.15f).coerceIn(48.dp, 120.dp)
                             Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(spinnerSize),
