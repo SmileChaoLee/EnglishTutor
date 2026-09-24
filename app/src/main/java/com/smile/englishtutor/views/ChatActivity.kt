@@ -99,6 +99,10 @@ class ChatActivity : BaseActivity() {
         val logStr = "TranslationBar"
         var isEnglishToOther by remember { mutableStateOf(true) }
         var otherText by remember { mutableStateOf(targetLanguage) }
+        val fromLanguageStr = "From Language"
+        val toLanguageStr = "To Language"
+        val englishLabel = if (isEnglishToOther) fromLanguageStr else toLanguageStr
+        val targetLabel = if (isEnglishToOther) toLanguageStr else fromLanguageStr
         val greenColors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color(0xFF4CAF50),
             unfocusedBorderColor = Color(0xFF4CAF50)
@@ -114,7 +118,7 @@ class ChatActivity : BaseActivity() {
                     value = englishLanguage,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Language") },
+                    label = { Text(englishLabel) },
                     colors = greenColors,
                     modifier = Modifier.weight(1f)
                 )
@@ -128,8 +132,8 @@ class ChatActivity : BaseActivity() {
                             targetLanguage = it
                             setTransLanguages(isEnglishToOther)
                         },
-                    label = { Text("Language") },
-                    placeholder = { Text("Enter target") },
+                    label = { Text(targetLabel) },
+                    placeholder = { Text("Enter Language") },
                     colors = greenColors,
                     modifier = Modifier.weight(1f)
                 )
